@@ -1,1 +1,7 @@
-used docs
+used documents, links, 
+
+progress bar
+https://pypi.python.org/pypi/tqdm
+
+
+
