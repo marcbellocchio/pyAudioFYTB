@@ -32,4 +32,16 @@ It allows to download files and start ffmpeg to extract audio
 # examples of code
 https://stackoverflow.com/questions/26495953/youtube-dl-python-library-documentation
 
+# Planning
+
+- [x] start it
+- [x] use python 3.x
+- [x] overall objectives and specification
+- [x] use pytest
+- [x] test pytube
+- [ ] 
+- [ ] next ?
+- [ ] next ?
+
+
 
