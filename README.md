@@ -1,6 +1,6 @@
 # pyAudioFYTB
 from a list of song to audio files on disk.
-The objective is to transform a shopping list of songs in text to a directory of audio files (mp3, ogg, ....) on disk.
+The objective is to transform a shopping list of songs (text format) to a directory of audio files (mp3, ogg, ....) on disk.
 
 # overall processing
 1. read the input text file
@@ -8,7 +8,7 @@ The objective is to transform a shopping list of songs in text to a directory of
 3. get video file details
 4. download the video on disk
 5. extract audio
-6. delete temporary files
+6. delete temporary files (video, convertion data)
 
 
 # usefull python code
