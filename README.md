@@ -39,7 +39,7 @@ https://stackoverflow.com/questions/26495953/youtube-dl-python-library-documenta
 - [x] overall objectives and specification
 - [x] use pytest
 - [x] test pytube
-- [ ] 
+- [ ] ...
 - [ ] next ?
 - [ ] next ?
 
