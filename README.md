@@ -11,19 +11,20 @@ The objective is to transform a shopping list of songs (text format) to a direct
 6. delete temporary files (video, convertion data)
 
 
-# usefull python code
+# APIs world
 
+## google API
 searching using google api, you need a developper key, see https://developers.google.com/api-client-library/python/guide/aaa_apikeys
 https://developers.google.com/youtube/v3/code_samples/python
 https://developers.google.com/youtube/v3/code_samples/python#search_by_keyword
 
-
+## pytube
 https://github.com/nficano/pytube
 pytube is a lightweight, dependency-free Python library (and command-line utility) for downloading YouTube Videos.
 the starting point si to get a link to the video to use this code.
 http://youtube.com/watch?v=9bZkp7q19f0
 
-
+## youtube-dl
 https://github.com/rg3/youtube-dl/blob/master/README.md#installation
 youtube-dl is a command-line program to download videos from YouTube.com and a few more sites. It requires the Python interpreter, version 2.6, 2.7, or 3.2+, and it is not platform specific. It should work on your Unix box, on Windows or on Mac OS X. It is released to the public domain, which means you can modify it, redistribute it or use it however you like. 
 It allows to download files and start ffmpeg to extract audio
