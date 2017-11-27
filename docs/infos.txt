@@ -2,6 +2,13 @@ used documents, links,
 
 progress bar
 https://pypi.python.org/pypi/tqdm
+https://github.com/niltonvolpato/python-progressbar
+
+// top
+http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#ascii-progress-bar
+http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
 
 
-
+uml from python
+https://www.pylint.org/
+https://pylint.readthedocs.io/en/latest/user_guide/run.html
