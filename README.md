@@ -42,6 +42,11 @@ https://stackoverflow.com/questions/26495953/youtube-dl-python-library-documenta
 - [ ] ...
 - [ ] next ?
 - [ ] next ?
+- [ ] run on windows
+- [ ] run on linux
+- [ ] run on mac OS
+- [ ] dockers ?
+- [ ] portable version
 
 
 
