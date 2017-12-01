@@ -23,7 +23,8 @@ class pyAudioConfig():
     youtubevideourl                     = "https:\\youtube.com\watch?v="
     youtubemaxresult                    = 1
     youtubesearchtype                   = "video"
-    youtuvevifdeoIDkey                  = "['items'][0]['id']['videoId']"
+    youtubevideoIDkey                  = " 'items'][0]['id']['videoId' "
+
 
 
 

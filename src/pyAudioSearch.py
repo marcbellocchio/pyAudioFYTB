@@ -135,12 +135,13 @@ class pyAudioSearch(object):
         ...
         '''
         # create json object
-        jsonob = json.load(self.extendedresult)
+        jsonob = json.loads(self.extendedresult)
         # shall find the key videoId in the json
-        try:
-            self.ytsresult = jsonob[pyAudioConfig.youtuvevifdeoIDkey]
+        try:            
+            #print (jsonob[pyAudioConfig.youtubevideoIDkey])
+            self.ytsvideoid =  jsonob['items'][0]['id']['videoId']
         except :
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot get the id of the video from" + pyAudioConfig.youtuvevifdeoIDkey + self.filename )
+            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot get the id of the video from" + "pyAudioConfig.youtubevideoIDkey" + self.filename )
             
     def GetExtendedResult(self):  
         '''
