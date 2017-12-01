@@ -8,7 +8,12 @@ https://github.com/niltonvolpato/python-progressbar
 http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#ascii-progress-bar
 http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
 
+//enumerate / counter
+http://book.pythontips.com/en/latest/enumerate.html
 
 uml from python
 https://www.pylint.org/
 https://pylint.readthedocs.io/en/latest/user_guide/run.html
+
+// __all__
+https://stackoverflow.com/questions/44834/can-someone-explain-all-in-python
