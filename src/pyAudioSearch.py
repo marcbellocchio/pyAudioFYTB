@@ -6,10 +6,10 @@ Created on 12 nov. 2017
 
 from __future__ import absolute_import
 
-from googleapiclient.discovery  import build
+from googleapiclient.discovery  import build 
 #from googleapiclient.errors     import HttpError
 from pyAudioInputList import pyAudioInputList
-from pyAudioConfig import  pyAudioConfig
+#from pyAudioConfig import  pyAudioConfig
 import sys
 import json
 
@@ -143,15 +143,16 @@ class pyAudioSearch(object):
         except :
             self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot get the id of the video from" + "pyAudioConfig.youtubevideoIDkey" + self.filename )
             
+            
+    def SetExtendedResult(self, result): 
+        '''
+        used to reset the result or to initialise it
+        ''' 
+        
+        self.extendedresult = result 
+            
     def GetExtendedResult(self):  
         '''
         call it when it is necessary to be inform of the full result of the single search
         '''
         return self.extendedresult 
-          
-    def SetExtendedResult(self, result): 
-        '''
-        used to reset the result or to initialise it
-        ''' 
-        self.extendedresult = result      
-        
