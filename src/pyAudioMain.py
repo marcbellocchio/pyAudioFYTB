@@ -107,7 +107,9 @@ class pyAudioMain(object):
     metadata = property (_GetMetadata,_SetMetaData )
         
     def ParseArgs(self, argus):
-               
+        '''
+        get program arguments, call associated functions to store them
+        '''     
         try:           
             if (argus.inputlist != None):
                 # setting the list
@@ -127,10 +129,11 @@ class pyAudioMain(object):
                 self.SetAudioOutputDir(argus.audiooutdir) 
             else:
                 self.SetAudioOutputDir(pyAudioConfig.outputaudiodir)   
+                
             if (argus.playlist != None) :  
                 self.SetPlayList(argus.playlist)  
             else:
-                self.SetPlayList(pyAudioConfig.)
+                self.SetPlayList(pyAudioConfig.playlistname)
 
                 
                            
@@ -148,25 +151,34 @@ class pyAudioMain(object):
         # object that manage input list
         self.pyAL = pyAudioInputList (self.pyAT, self.GetInputListName())
         # object that will handle the query using youtube api
-        self.pyAS = pyAudioSearch(self.pyAT,self.GetDevKey())
+        self.pyAS = pyAudioSearch(self.pyAT,self)
         # create the service object to initiate the youtube query
         self.pyAS.BuildYoutubeObject()
         # object that will get the video from one url
         self.pyAV = pyAudioVideos(self.pyAT,None)
         # processing each input line of the input list
-        # get the number of line
-        self.nbline = self.pyAL.GetNumberofLine()
-        self.currentlinenb = 0
         # prepare the progress bar to inform about the processed line
         if (self.pyAS.OpenInputList() == True):
+            # get the number of line in the input list
+            self.nbline = self.pyAL.GetNumberofLine()
+            self.currentlinenb = 0
             while self.pyAS.SingleSearch() != None:
                 # progress bar
-                self.IncrementLineProgressBar()
+                #self.IncrementLineProgressBar()
                 # set video id in video class
                 self.pyAV.SetVideoId(self.pyAS.GetVideoId())
-                # create URL
-                self.pyAV.GetVideoUrl()
-                # request the video infos
+                # get all possible links
+                if (self.pyAV.SearchFinalLinks()):
+                    #create a name for the file stored on disk
+                    self.pyAV.SetDownloadName(self.GetAudioOutputDir(), self.pyAS.GetQuery())
+                    #download with progress bar
+                    self.pyAV.DownloadFromRealUrlWithProgressBar()
+                else:
+                    # final link not found shall be kept in tracking
+                    self.pyAT.SetError(self, sys._getframe().f_code.co_name, "cannot get final link for download, query is:",self.pyAS.GetQuery() )
+                      
+                  
+
             
             
             self.pyAS.CloseInputFile()

@@ -31,7 +31,7 @@ class pyAudioInputList(object):
         try:
             self.file = open(self.filename, 'r')
         except IOError:
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot open input list" + self.filename )
+            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot open input list" )
             ret = False
         return ret
     def GetLine(self):
@@ -42,7 +42,7 @@ class pyAudioInputList(object):
         try:
             retline= self.file.readline()
         except IOError:
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from" + self.filename )
+            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from"  )
         finally:  
             return   retline           
 
@@ -52,7 +52,7 @@ class pyAudioInputList(object):
             while (self.GetLine()!= None):
                 nbline = nbline + 1
         except IOError:
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from" + self.filename )
+            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from" )
         finally:             
             return nbline    
 

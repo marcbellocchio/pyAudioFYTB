@@ -75,6 +75,11 @@ class pyAudioSearch(object):
         self.youtube        = None
         # store py main object created in main file
         self.pyMain         = pymain
+        # query a line of text from the input file
+        self.query          = None
+        
+    def GetQuery(self):
+        return self.query
 
     def OpenInputList(self):
         '''
@@ -99,15 +104,15 @@ class pyAudioSearch(object):
         self.ytsvideoid     = None
         self.extendedresult = None
         # read a line of text from the input file
-        query = self.pyAL.GetLine()
-        if (query != None):
+        self.query = self.pyAL.GetLine()
+        if (self.query != None):
             try:               
-                self.extendedresult = self.self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot open input list" + self.filename )(
-                    q=query,
-                    type='video',       # only video shall be collected
-                    part='id,snippet',  # request both id and request object in the response
-                    key=self.pyMain.GetDevKey(),
-                    maxResults=1
+                self.extendedresult = self.youtube.search().list(
+                    q=self.query,                    # query contains the line of text words (song interpret for example)
+                    type='video',               # only video shall be collected
+                    part='id,snippet',          # request both id and request object in the response
+                    key=self.pyMain.GetDevKey(),# dev key 2500 qurey per day for free
+                    maxResults=1                # single result as best hit at the beginning of the result
                   ).execute()
                 
             except:
@@ -135,13 +140,18 @@ class pyAudioSearch(object):
         ...
         '''
         # create json object
-        jsonob = json.loads(self.extendedresult)
-        # shall find the key videoId in the json
-        try:            
-            #print (jsonob[pyAudioConfig.youtubevideoIDkey])
-            self.ytsvideoid =  jsonob['items'][0]['id']['videoId']
-        except :
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot get the id of the video from" + "pyAudioConfig.youtubevideoIDkey" + self.filename )
+        if self.extendedresult != None:
+            strfromdict = json.dumps(self.extendedresult)  # create the json using dumps as the results is a dict
+            #print("strfromdict:", strfromdict)
+            #print ("video id from dict", self.extendedresult.get('videoId'))
+            jsonob = json.loads(strfromdict)
+            #print("json object", jsonob)
+            # shall find the key videoId in the json
+            try:            
+                #print (jsonob[pyAudioConfig.youtubevideoIDkey])
+                self.ytsvideoid =  jsonob['items'][0]['id']['videoId']
+            except :
+                self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot get the id of the video from" + "pyAudioConfig.youtubevideoIDkey"  )
             
             
     def SetExtendedResult(self, result): 

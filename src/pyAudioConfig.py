@@ -17,6 +17,7 @@ class pyAudioConfig():
     #outputdir                           = "C:\\Users\\mbl\\develop\\pyAudioFYTB\\tmp"
     outputvideodir                      = "C:\\Users\mbl\\develop\\pyAudioFYTB\\tmpv"
     outputaudiodir                      = "C:\\Users\mbl\\develop\\pyAudioFYTB\\tmpa"
+    playlistname                        = "myplaylist.m3u8"
     logfile                             = "C:\\Users\\mbl\\develop\\pyAudioFYTB\\tmp\\log.txt"
     #logfile                             = "C:\\MBL_DATA\\dev\\python\\pyAudioFYTB\\tmp\\log.txt"
     # >>>> end of change me <<<<<<<
