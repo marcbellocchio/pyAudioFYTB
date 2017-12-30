@@ -20,6 +20,7 @@ class pyAudioTqdmUpTo(tqdm):
         """
         if tsize is not None:
             self.total = tsize
+        #self.clear()
         self.update(b * bsize - self.n)  # will also set self.n = b * bsize
 
 

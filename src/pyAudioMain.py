@@ -11,6 +11,8 @@ from pyAudioTracking        import pyAudioTracking
 from pyAudioSearch          import pyAudioSearch
 from pyAudioVideos          import pyAudioVideos
 from pyAudioConfig          import pyAudioConfig
+from pyAudioCSV             import pyAudioCSV
+from pyAudioFFmpeg          import pyAudioFFmpeg
 import argparse
 
 
@@ -27,7 +29,7 @@ class pyAudioMain(object):
     Usage: python kgp.py [options] [source]
     
     Options:
-      -l ..., --list=...      use input list of song and singer
+      -l ..., --inputlist  use input list of song and singer
       -h, --help              show this help
     
     
@@ -139,15 +141,61 @@ class pyAudioMain(object):
                            
         except:
             self.pyAT.SetError(self, sys._getframe().f_code.co_name, "wrong arguments" + str(argus) )
+    
+    def AddToCSV(self, query, link, outputfile ):
+        
+        try:
+            CSVFile = pyAudioCSV()
+            CSVFile.Open()
+            CSVFile.AddQuery(query)
+            CSVFile.AddLink(link)
+            CSVFile.AddOutputFile(outputfile)
+            CSVFile.Close()
+        except:
+            error = "cannot add to CSV: query: "+ query
+            self.pyAT.SetError(self, sys._getframe().f_code.co_name, error  )
         
         
         
+    def AddToPlayList(self):
+        '''
+        add the audio filename in the playlist
+        '''
+        try:
+            plfile = open(self.GetAudioOutputDir() + "\\" + self.playlist, 'a')
+        except IOError:
+            self.pyAT.SetError(self, sys._getframe().f_code.co_name, "cannot open playlist:", self.playlist )
+        finally:
+            if plfile:
+                plfile.write(self.pyAV.GetShortName() + "\r\n")
+                plfile.close()
+      
+    def ExtractAudio(self):
+        '''
+        extract audio from a file
+        '''
+        if not self.pyAV.IsAudioFile():
+            # extract audio with ffmpeg
+            sffmpeg = pyAudioFFmpeg(self.pyAT)
+            sffmpeg.SetInputFile(self.pyAV.GetFullDownloadName())
+            sffmpeg.SetOutputFile(self.pyAV.GetFullDownloadName() + "_.mp4")
+            sffmpeg.CreateCommand()
+            sffmpeg.Run()
+            
+    def IncrementLineProgressBar(self):
+            #for i in range(0, 100):
+                #time.sleep(0.1)
+            self.currentlinenb = self.currentlinenb + 1
+            print("now processing line " , self.currentlinenb, " over ", self.nbline, "\n" )
+
+
+              
     def Start(self):
         '''
         start the query based on the input list
         called from main, this is the core function of the program
         '''
-
+        print("python program is starting ...")
         # object that manage input list
         self.pyAL = pyAudioInputList (self.pyAT, self.GetInputListName())
         # object that will handle the query using youtube api
@@ -158,30 +206,40 @@ class pyAudioMain(object):
         self.pyAV = pyAudioVideos(self.pyAT,None)
         # processing each input line of the input list
         # prepare the progress bar to inform about the processed line
+        #print("python program reading list ...")
         if (self.pyAS.OpenInputList() == True):
             # get the number of line in the input list
-            self.nbline = self.pyAL.GetNumberofLine()
+            self.nbline = self.pyAS.GetNumberofLine()
             self.currentlinenb = 0
+            #print("python program single search ...")
             while self.pyAS.SingleSearch() != None:
                 # progress bar
-                #self.IncrementLineProgressBar()
+                self.IncrementLineProgressBar()
                 # set video id in video class
                 self.pyAV.SetVideoId(self.pyAS.GetVideoId())
-                # get all possible links
-                if (self.pyAV.SearchFinalLinks()):
-                    #create a name for the file stored on disk
-                    self.pyAV.SetDownloadName(self.GetAudioOutputDir(), self.pyAS.GetQuery())
-                    #download with progress bar
-                    self.pyAV.DownloadFromRealUrlWithProgressBar()
+                if (self.pyAV.IsVideoIdValid()):
+                    # get all possible links
+                    if (self.pyAV.SearchFinalLinks()):
+                        #create a name for the file stored on disk
+                        self.pyAV.SetFullDownloadName(self.GetAudioOutputDir(), self.pyAS.GetQuery())
+                        #download with progress bar
+                        self.pyAV.DownloadFromRealUrlWithProgressBar()
+                        # if the file is pure audio, add the short name to the playlist
+                        self.ExtractAudio()
+                        # if the file is video and audio, start ffmpeg, extract audio and add name to playlist
+                        self.AddToPlayList()
+                        # CSV fr logging
+                        self.AddToCSV(self.pyAS.GetQuery(), self.pyAV.GetFinalLink(), self.pyAV.GetFullDownloadName())
+                    else:
+                        # final link not found shall be kept in tracking
+                        self.pyAT.SetError(self, sys._getframe().f_code.co_name, "cannot get final link for download, query is:",self.pyAS.GetQuery() )
+                        # CSV fr logging
+                        self.AddToCSV(self.pyAS.GetQuery(), "extended result" + self.pyAS.GetExtendedResult(), "not downloaded")
                 else:
-                    # final link not found shall be kept in tracking
-                    self.pyAT.SetError(self, sys._getframe().f_code.co_name, "cannot get final link for download, query is:",self.pyAS.GetQuery() )
-                      
-                  
-
-            
-            
+                    warn = " >>> videoid is missing from query " + str(self.pyAS.GetQuery()) + str(self.pyAS.GetExtendedResult())
+                    self.pyAT.SetWarning(self, sys._getframe().f_code.co_name, warn)
             self.pyAS.CloseInputFile()
+            print("python end ...")
             
         else:
             print("cannot open input file" + self.GetInputListName())
@@ -201,7 +259,7 @@ def main(argv):
     parser.add_argument("-ao", "--audiooutdir",  
                         help="outputdir for audio")   
     parser.add_argument("-pl", "--playlist",  
-                        help="name of the playlist to store links to audio files")     
+                        help="name of the playlist to store links to audio files, it will be stored in the output dir of audio")     
     
     argus = parser.parse_args(argv)
     # creating main class

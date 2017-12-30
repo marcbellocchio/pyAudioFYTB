@@ -13,7 +13,10 @@ class pyAudioConfig():
 
     # >>>> change me <<<<<<<
     # openssl generic  
-    ffmpegxecutable                     = "C:\\OpenSSL-Win32\\bin\\openssl.exe"
+    ffmpegexec_win                      = "C:\\Users\\mbl\\develop\\pyAudioFYTB\\external\\ffmpeg-20171225-613f789-win64-static\\bin\\ffmpeg.exe"
+    ffmpegexec_linux                    = "C:\\OpenSSL-Win32\\bin\\openssl.exe"
+    ffmpegexec_mac                      = "C:\\OpenSSL-Win32\\bin\\openssl.exe"
+    
     #outputdir                           = "C:\\Users\\mbl\\develop\\pyAudioFYTB\\tmp"
     outputvideodir                      = "C:\\Users\mbl\\develop\\pyAudioFYTB\\tmpv"
     outputaudiodir                      = "C:\\Users\mbl\\develop\\pyAudioFYTB\\tmpa"
@@ -22,6 +25,8 @@ class pyAudioConfig():
     #logfile                             = "C:\\MBL_DATA\\dev\\python\\pyAudioFYTB\\tmp\\log.txt"
     # >>>> end of change me <<<<<<<
     
+    #
+    csvlogfile                          = "C:\\Users\mbl\\develop\\pyAudioFYTB\\tmpa\\csvlog.txt"
     
     # global settings
     undefined                           = "undefined"

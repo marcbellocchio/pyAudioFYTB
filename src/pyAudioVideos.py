@@ -33,14 +33,21 @@ class pyAudioVideos(object):
         Constructor
         '''
         # object that will manage errors, infos
-        self.tracking       = trackingobject
-        self.videoid        = videoid
-        self.mainurl        = None
-        self.finalink       = None
-        self.audionly       = None
-        self.downloadname   = None
-        self.audioext       = None
+        self.tracking           = trackingobject
+        self.videoid            = videoid
+        self.mainurl            = None
+        self.finalink           = None
+        self.audionly           = None
+        self.fulldownloadname   = None
+        self.audioext           = None
+        self.shortname          = None
       
+    def GetShortName(self):
+        return   self.shortname
+    
+    def SetShortName(self, insm):
+        self.shortname = insm
+            
     def SetAudioExt(self, ext):
         self.audioext = ext
         
@@ -59,19 +66,39 @@ class pyAudioVideos(object):
     def GetFinalLink(self):
         return self.finalink  
     
-    def SetDownloadName(self, audiooutdir, query):
+    def SetFullDownloadName(self, audiooutdir, query):
+        # create a filename compatible with os
+        outline = str("")
+        az_range=range(97,123)
+        AZ_range = range (65, 91)
+        val_range = range (48,58)
+        space_range = range (32, 33)
+        for i in range(len(query)):
+            value = ord(query[i] )
+            if ( (value in az_range) or (value in AZ_range) or (value in val_range) or (value in space_range) ):
+                outline = "".join([outline,query[i]])
+            else:
+                outline = "".join([outline,"_"])
         
-        name = query.replace('\r', '')
-        name = name.replace('\n', '')
-        self.downloadname = audiooutdir + "\\" + name + "." + self.GetAudioExt()
+        # remove carriage return from input list
+        self.shortname = outline.replace('\r', '')
+        self.shortname = self.shortname.replace('\n', '')
+        self.shortname = self.shortname + "." + self.GetAudioExt()
+        #build the name of the file on disk
+        self.fulldownloadname = audiooutdir + "\\" + self.shortname
         
-    def GetDownloadName(self):
-        return self.downloadname
+    def GetFullDownloadName(self):
+        return self.fulldownloadname
             
-      
     def SetVideoId(self, Id):
         self.videoid     = Id
-          
+    
+    def IsVideoIdValid(self):
+        val = False
+        if(self.videoid != "missing"):
+            val = True
+        return val
+    
     def GetVideoUrl (self): 
         '''
         construct the url to the video in youtube
@@ -100,14 +127,17 @@ class pyAudioVideos(object):
     
     def DownloadFromRealUrlWithProgressBar(self):
         '''
-        finalink is to url to the video to download
+        link is to url to the video to download
         
         '''
         link = self.GetFinalLink()
-        with pyAudioTqdmUpTo(unit='B', unit_scale=True, miniters=1,
-                      desc=link.split('/')[-1]) as myprogressbar:  # all optional kwargs
+        #with pyAudioTqdmUpTo(unit='B', unit_scale=True, miniters=1, leave=False,
+        #              desc=link.split('/')[-1]) as myprogressbar:  # all optional kwargs
             
-            urllib.request.urlretrieve(link, filename=self.GetDownloadName(),
+        with pyAudioTqdmUpTo(unit='B', unit_scale=True, miniters=1, leave=False,
+                      desc="downloading " + self.GetShortName()) as myprogressbar:  # all optional kwargs
+            #print("download name",self.GetFullDownloadName())
+            urllib.request.urlretrieve(link, filename=self.GetFullDownloadName(),
                                reporthook=myprogressbar.update_to, data=None)
         
     def SearchFinalLinks(self):

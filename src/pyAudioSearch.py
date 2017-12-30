@@ -86,6 +86,9 @@ class pyAudioSearch(object):
         return True when file is opened
         '''
         return self.pyAL.Open()
+    
+    def GetNumberofLine(self):
+        return self.pyAL.GetNumberofLine()
 
     def CloseInputFile(self):
         self.pyAL.Close()  
@@ -100,26 +103,29 @@ class pyAudioSearch(object):
         then call the search api of youtube
         finally report the videoId collected from the api response
         return None when finished  
+        return missing when videoid cannot be collected
         '''
         self.ytsvideoid     = None
         self.extendedresult = None
         # read a line of text from the input file
         self.query = self.pyAL.GetLine()
-        if (self.query != None):
+        #("single search query ", str(self.query))
+        if ( (self.query != None) and (self.query != "") ) :
             try:               
                 self.extendedresult = self.youtube.search().list(
                     q=self.query,                    # query contains the line of text words (song interpret for example)
                     type='video',               # only video shall be collected
                     part='id,snippet',          # request both id and request object in the response
-                    key=self.pyMain.GetDevKey(),# dev key 2500 qurey per day for free
+                    key=self.pyMain.GetDevKey(),# dev key 2500 query per day for free
                     maxResults=1                # single result as best hit at the beginning of the result
                   ).execute()
-                
-            except:
-                self.tracking.SetError(self, sys._getframe().f_code.co_name, "error while calling youtube search" + self.filename )
-            finally:
                 self.ExtractVideoId()
+            except:
+                self.tracking.SetError(self, sys._getframe().f_code.co_name, "error while calling youtube search" )
+            finally:
                 return self.ytsvideoid  
+        else:
+            return self.ytsvideoid 
               
     def GetVideoId(self):
         return self.ytsvideoid 
@@ -127,6 +133,7 @@ class pyAudioSearch(object):
     def ExtractVideoId(self):
         '''
         extract videoid from extended result
+        https://github.com/youtube/api-samples/blob/master/python/search.py for parsing
         ...
          "items": [
               {
@@ -140,7 +147,7 @@ class pyAudioSearch(object):
         ...
         '''
         # create json object
-        if self.extendedresult != None:
+        if ((self.extendedresult != None) and (self.extendedresult != "") ):
             strfromdict = json.dumps(self.extendedresult)  # create the json using dumps as the results is a dict
             #print("strfromdict:", strfromdict)
             #print ("video id from dict", self.extendedresult.get('videoId'))
@@ -149,9 +156,13 @@ class pyAudioSearch(object):
             # shall find the key videoId in the json
             try:            
                 #print (jsonob[pyAudioConfig.youtubevideoIDkey])
-                self.ytsvideoid =  jsonob['items'][0]['id']['videoId']
+                if (jsonob['pageInfo']['totalResults'] != 0):
+                    self.ytsvideoid =  jsonob['items'][0]['id']['videoId']
+                else:
+                    self.ytsvideoid = "missing"
             except :
-                self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot get the id of the video from" + "pyAudioConfig.youtubevideoIDkey"  )
+                error = "cannot get the id of the video from jsonobject: " + str(jsonob) + "query is : " + str(self.GetQuery())
+                self.tracking.SetError(self, sys._getframe().f_code.co_name, error  )
             
             
     def SetExtendedResult(self, result): 
