@@ -52,9 +52,9 @@ class pyAudioInputList(object):
             self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from"  )
         finally:  
             #outline1 = retline.replace("/","")
-            if( (retline !="") and (retline !="\n")) :
-                outline = str(retline)
-            return   outline
+            #if( (retline !="") and (retline !="\n")) :
+            outline = str(retline)
+            return   outline.replace("+","")
             #return unicodedata.normalize('NFKD', outline).encode('ascii','ignore')
         
     def GetLinePostProcess(self):
@@ -104,10 +104,19 @@ class pyAudioInputList(object):
   
 
     def GetNumberofLine (self):
+        '''
+        number of real line with text
+        '''
         nbline = 0
         try:
-            while (self.GetLine()):
-                nbline = nbline + 1
+            while ( True):
+                retline = self.GetLine()
+                if ( (retline == None) or (retline == "")):
+                    break
+                realine = str(retline).strip()
+                if(len(realine) > 5):
+                #if( (retline !="") and (retline !="\n") and (retline !=" ")) :
+                    nbline = nbline + 1
         except IOError:
             self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from" )
         finally:

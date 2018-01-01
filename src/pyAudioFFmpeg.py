@@ -66,7 +66,7 @@ class pyAudioFFmpeg(object):
         execute ffmpeg in a sub process
         command shall be created before
         '''   
-        print("starting ffmpeg to extract audio ......") 
+        print("starting ffmpeg to extract audio from :" + self.GetInputFile()) 
         handle = None
         try:
             handle = subprocess.Popen(self.command, stderr=DEVNULL, stdout=subprocess.PIPE, stdin=subprocess.PIPE)

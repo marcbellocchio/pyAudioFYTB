@@ -185,9 +185,9 @@ class pyAudioMain(object):
     def IncrementLineProgressBar(self):
             #for i in range(0, 100):
                 #time.sleep(0.1)
-            self.currentlinenb = self.currentlinenb + 1
-            print("now processing line " , self.currentlinenb, " over ", self.nbline, "\n" )
-
+            if(self.pyAS.GetVideoId() != "missing blank" ):
+                self.currentlinenb = self.currentlinenb + 1
+                print("now processing line " , self.currentlinenb, " over ", self.nbline, "\n" )
 
               
     def Start(self):
@@ -236,8 +236,9 @@ class pyAudioMain(object):
                         # CSV fr logging
                         self.AddToCSV(self.pyAS.GetQuery(), "extended result" + self.pyAS.GetExtendedResult(), "not downloaded")
                 else:
-                    warn = " >>> videoid is missing from query " + str(self.pyAS.GetQuery()) + str(self.pyAS.GetExtendedResult())
-                    self.pyAT.SetWarning(self, sys._getframe().f_code.co_name, warn)
+                    if(self.pyAS.GetVideoId() == "missing" ):
+                        warn = " >>> videoid is missing from query " + str(self.pyAS.GetQuery()) + str(self.pyAS.GetExtendedResult())
+                        self.pyAT.SetWarning(self, sys._getframe().f_code.co_name, warn)
             self.pyAS.CloseInputFile()
             print("python end ...")
             

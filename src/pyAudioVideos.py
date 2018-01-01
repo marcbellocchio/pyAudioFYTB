@@ -95,7 +95,7 @@ class pyAudioVideos(object):
     
     def IsVideoIdValid(self):
         val = False
-        if(self.videoid != "missing"):
+        if( (self.videoid != "missing") and (self.videoid != "missing blank")):
             val = True
         return val
     
