@@ -40,8 +40,11 @@ http://youtube.com/watch?v=9bZkp7q19f0
 - [x] run test using a list of 117 songs
 - [x] filter extra characters in the input list for robustness
 - [x] second python code extracts mp4 files and convert to mp3
-- [ ] test channel and playlist search to extract audio files
-
+- [ ] test playlist type search to get id of the playlist and get all the videos links using playlist items
+- [ ] update code to manage playlist and playlist items
+- [ ] test using known playlists of 50, 100 items 
+- [ ] test using bigger playlists
+- [ ] wip
 - [ ] run on linux
 - [ ] run on mac OS
 - [ ] dockers ?
