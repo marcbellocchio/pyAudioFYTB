@@ -5,7 +5,7 @@ Created on 12 nov. 2017
 '''
 
 from __future__ import absolute_import
-
+from pyAudioConfig import  pyAudioConfig
 from googleapiclient.discovery  import build 
 #from googleapiclient.errors     import HttpError
 from pyAudioInputList import pyAudioInputList
@@ -65,8 +65,8 @@ class pyAudioSearch(object):
         '''
         # object that will manage errors, infos
         self.tracking       = trackingobject
-        # youtube search result of video id
-        self.ytsvideoid      = None
+        # youtube search result of video id coded as dict
+        self.ytsvideoidict  = dict([(pyAudioConfig.dictstatus, None), (pyAudioConfig.dictvideoid, None) , (pyAudioConfig.dictdescription, None)])
         # extended result stored the query result
         self.extendedresult = None
         # input list object
@@ -78,9 +78,14 @@ class pyAudioSearch(object):
         # query a line of text from the input file
         self.query          = None
         
+        
+    
     def GetQuery(self):
         return self.query
-
+    
+    def SetQuery(self, inquery):
+        self.query = inquery
+        
     def OpenInputList(self):
         '''
         return True when file is opened
@@ -103,19 +108,20 @@ class pyAudioSearch(object):
         then call the search api of youtube
         finally report the videoId collected from the api response
         return None when finished  
-        return missing when videoid cannot be collected
         '''
-        self.ytsvideoid     = None
+        self.SetVideoId(pyAudioConfig.nonevideoid, 0)
+        returnval           = None
         self.extendedresult = None
         # read a line of text from the input file
-        self.query = self.pyAL.GetLine()
+        self.SetQuery(self.pyAL.GetLine())
         #("single search query ", str(self.query))
-        if ( (self.query != None) and (self.query != "")  ) :
+        if ( (self.GetQuery() != None) and (self.GetQuery() != "")  ) :
             try:       
+                returnval = True
                 detectemptyline = str(self.query).strip()        
                 if( (detectemptyline != "\n") and  (detectemptyline != "") ):# no need to start searching
                     self.extendedresult = self.youtube.search().list(
-                        q=self.query,                    # query contains the line of text words (song interpret for example)
+                        q=self.GetQuery(),                    # query contains the line of text words (song interpret for example)
                         type='video',               # only video shall be collected
                         part='id,snippet',          # request both id and request object in the response
                         key=self.pyMain.GetDevKey(),# dev key 2500 query per day for free
@@ -123,23 +129,50 @@ class pyAudioSearch(object):
                       ).execute()
                     self.ExtractVideoId()
                 else:
-                    self.SetVideoId("missing blank") # \n detected so videoID is missing for blank
+                    self.SetVideoId(pyAudioConfig.missingvideoidasblankquery, 0) # \n detected so videoID is missing for blank query
             except:
                 self.tracking.SetError(self, sys._getframe().f_code.co_name, "error while calling youtube search" )
             finally:
-                return self.ytsvideoid  
+                return returnval # True to say that the end of the input list is not here
         else:
-            print("end detected")
-            print("query is " + self.query )
-            return self.ytsvideoid 
+            return returnval   # at the end of the input list 
               
     def GetVideoId(self):
-        return self.ytsvideoid 
+        return self.ytsvideoidict  # return dict
     
-    def SetVideoId(self, inId):
-        self.ytsvideoid = inId
-
-    def ExtractVideoId(self):
+    def GetVideoIdStatus(self):
+        return self.ytsvideoidict[pyAudioConfig.dictstatus]
+    
+    def IsVideoIdMissing(self):
+        '''
+        return true when the videoid is not valid as the result of the query is empty
+        '''
+        val = False
+        if (self.GetVideoIdStatus() == pyAudioConfig.missingvideoid):
+            val = True
+        return val
+    
+    def IsVideoIdBlank(self):
+        '''
+        return true when the videoid cannot be used due to a query not done
+        '''
+        val = False
+        if (self.GetVideoIdStatus() == pyAudioConfig.missingvideoidasblankquery):
+            val = True
+        return val
+    
+    def SetVideoId(self, status, inId):
+        
+        self.ytsvideoidict[pyAudioConfig.dictstatus] = status
+        self.ytsvideoidict[pyAudioConfig.dictvideoid] = inId
+        
+    def SetVideoIdDesc(self, descrip):
+        self.ytsvideoidict[pyAudioConfig.dictdescription] = descrip
+        
+    def GetVideoIdDesc(self):
+        return self.ytsvideoidict[pyAudioConfig.dictdescription]
+        
+    def ExtractVideoIdJson(self):
         '''
         extract videoid from extended result
         https://github.com/youtube/api-samples/blob/master/python/search.py for parsing
@@ -155,31 +188,62 @@ class pyAudioSearch(object):
                
         ...
         '''
-        
-        
         # create json object
-        if ((self.extendedresult != None) and (self.extendedresult != "") ):
-            strfromdict = json.dumps(self.extendedresult)  # create the json using dumps as the results is a dict
+        if ((self.GetExtendedResult()() != None) and (self.GetExtendedResult() != "") ):
+            strfromdict = json.dumps(self.GetExtendedResult())  # create the json using dumps as the results is a dict
             #print("strfromdict:", strfromdict)
             #print ("video id from dict", self.extendedresult.get('videoId'))
             jsonob = json.loads(strfromdict)
             #print("json object", jsonob)
             # shall find the key videoId in the json
             try:     
-                self.ytsvideoid = "missing"
+                self.SetVideoId(pyAudioConfig.missingvideoid, 0) # missing as the query result has not been parsed
+                
                 for search_result in jsonob.get('items', []):
-                    self.ytsvideoid = search_result['id']['videoId']
+                    self.SetVideoId(pyAudioConfig.validvideoId, search_result['id']['videoId'])# videoid ok
+
                     break
             except :
                 error = "cannot get the id of the video from jsonobject: " + str(jsonob) + "query is : " + str(self.GetQuery())
                 self.tracking.SetError(self, sys._getframe().f_code.co_name, error  )
             
+
+
+    def ExtractVideoId(self):
+        '''
+        extract videoid from extended result
+        https://github.com/youtube/api-samples/blob/master/python/search.py for parsing
+        ...
+         "items": [
+              {
+               "kind": "youtube#searchResult",
+               "etag": "\"ld9biNPKjAjgjV7EZ4EKeEGrhao/pDl8RYaBDoe0zRXuTWl3ClFmMtk\"",
+               "id": {
+                "kind": "youtube#video",
+                "videoId": "L3wKzyIN1yk"
+               },
+               https://docs.python.org/2/library/re.html#
+        ...
+        '''
+        # extended result is a dict returned by youtube api
+        if ((self.GetExtendedResult() != None) and (self.GetExtendedResult() != "") ):
+
+            try:     
+                self.SetVideoId(pyAudioConfig.missingvideoid, 0) # missing as the query result has not been parsed
+                self.SetVideoIdDesc("")
+                for search_result in self.GetExtendedResult().get('items', []):
+                    self.SetVideoId(pyAudioConfig.validvideoId, search_result['id']['videoId'])# videoid ok
+                    self.SetVideoIdDesc(search_result['snippet']['description']) # description to be used as idtag for audio
+                    break
+            except :
+                error = "cannot get the id of the video from jsonobject: " + str(self.GetExtendedResult()) + "query is : " + str(self.GetQuery())
+                self.tracking.SetError(self, sys._getframe().f_code.co_name, error  )
             
+           
     def SetExtendedResult(self, result): 
         '''
         used to reset the result or to initialise it
         ''' 
-        
         self.extendedresult = result 
             
     def GetExtendedResult(self):  

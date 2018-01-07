@@ -169,23 +169,42 @@ class pyAudioMain(object):
             if plfile:
                 plfile.write(self.pyAV.GetShortName() + "\r\n")
                 plfile.close()
-      
+
+    def NormaliseAudio(self):
+        '''
+        detect audio level mean and max 
+        max level shall be 0 db
+        min level shall be close to -12 to -10 db
+        '''
+        pass
+
     def ExtractAudio(self):
         '''
         extract audio from a file
         '''
+        sffmpeg = pyAudioFFmpeg(self.pyAT)
+        sffmpeg.DetectOsPlatform()
+        sffmpeg.SetInputFile(self.pyAV.GetFullDownloadName())
+        sffmpeg.SetOutputFile(self.pyAV.GetFullDownloadName() + pyAudioConfig.extractfromffmpegext)
         if not self.pyAV.IsAudioFile():
             # extract audio with ffmpeg
-            sffmpeg = pyAudioFFmpeg(self.pyAT)
-            sffmpeg.SetInputFile(self.pyAV.GetFullDownloadName())
-            sffmpeg.SetOutputFile(self.pyAV.GetFullDownloadName() + "_.mp4")
-            sffmpeg.CreateCommand()
-            sffmpeg.Run()
+            sffmpeg.CreateCommandExtractAudio()
+            sffmpeg.RunExtractAudio()
+            sffmpeg.SetInputFile(sffmpeg.GetOutputFile())
+        
+        # by default generate mp3 with metadata title album
+        strtostrip = "." + pyAudioConfig.mp4extension
+        sffmpeg.SetTitle(str(self.pyAV.GetShortName()).rstrip(strtostrip))
+        sffmpeg.SetAlbumDesc(self.pyAS.GetVideoIdDesc())
+        sffmpeg.SetAudioExtToStrip(self.pyAV.GetAudioExt())
+        sffmpeg.CreateCommandMp4ToMp3()
+        sffmpeg.RunConvertToMp3()
+        # set the short name to be used in the playlist
+        self.pyAV.SetShortName(sffmpeg.GetShortNameMp3())
+                   
             
     def IncrementLineProgressBar(self):
-            #for i in range(0, 100):
-                #time.sleep(0.1)
-            if(self.pyAS.GetVideoId() != "missing blank" ):
+            if(not self.pyAS.IsVideoIdBlank()): # when videoid is not available as the query has not been done, the increment is not done
                 self.currentlinenb = self.currentlinenb + 1
                 print("now processing line " , self.currentlinenb, " over ", self.nbline, "\n" )
 
@@ -224,9 +243,9 @@ class pyAudioMain(object):
                         self.pyAV.SetFullDownloadName(self.GetAudioOutputDir(), self.pyAS.GetQuery())
                         #download with progress bar
                         self.pyAV.DownloadFromRealUrlWithProgressBar()
-                        # if the file is pure audio, add the short name to the playlist
+                        # if the file is video and audio, start ffmpeg, extract audio 
                         self.ExtractAudio()
-                        # if the file is video and audio, start ffmpeg, extract audio and add name to playlist
+                        # add the short name to the playlist
                         self.AddToPlayList()
                         # CSV fr logging
                         self.AddToCSV(self.pyAS.GetQuery(), self.pyAV.GetFinalLink(), self.pyAV.GetFullDownloadName())
@@ -236,11 +255,11 @@ class pyAudioMain(object):
                         # CSV fr logging
                         self.AddToCSV(self.pyAS.GetQuery(), "extended result" + self.pyAS.GetExtendedResult(), "not downloaded")
                 else:
-                    if(self.pyAS.GetVideoId() == "missing" ):
+                    if(self.pyAS.IsVideoIdMissing() ): # if missing due to a query with empty result, store in trace
                         warn = " >>> videoid is missing from query " + str(self.pyAS.GetQuery()) + str(self.pyAS.GetExtendedResult())
                         self.pyAT.SetWarning(self, sys._getframe().f_code.co_name, warn)
             self.pyAS.CloseInputFile()
-            print("python end ...")
+            print("end of pyAudio Grabber, thank you for using!")
             
         else:
             print("cannot open input file" + self.GetInputListName())

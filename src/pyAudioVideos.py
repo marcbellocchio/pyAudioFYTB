@@ -28,13 +28,13 @@ class pyAudioVideos(object):
     ''' 
 
 
-    def __init__(self, trackingobject, videoid):
+    def __init__(self, trackingobject, videoiddict):
         '''
         Constructor
         '''
         # object that will manage errors, infos
         self.tracking           = trackingobject
-        self.videoid            = videoid
+        self.videoiddict        = videoiddict  # dict
         self.mainurl            = None
         self.finalink           = None
         self.audionly           = None
@@ -90,12 +90,21 @@ class pyAudioVideos(object):
     def GetFullDownloadName(self):
         return self.fulldownloadname
             
-    def SetVideoId(self, Id):
-        self.videoid     = Id
+    def SetVideoId(self, dictvid):
+        self.videoiddict     = dictvid  # dict
+        
+    def GetVideoIdStatus(self):
+        return self.videoiddict[pyAudioConfig.dictstatus] # status only to determine if an url can be generated
+    
+    def GetVideoIdValue(self):
+        return self.videoiddict[pyAudioConfig.dictvideoid] # to generate the url to video
     
     def IsVideoIdValid(self):
+        '''
+        return true when the videoid value can be used to create a valid url
+        '''
         val = False
-        if( (self.videoid != "missing") and (self.videoid != "missing blank")):
+        if (self.GetVideoIdStatus() == pyAudioConfig.validvideoId):
             val = True
         return val
     
@@ -103,7 +112,7 @@ class pyAudioVideos(object):
         '''
         construct the url to the video in youtube
         '''
-        self.mainurl = pyAudioConfig.youtubevideourl + self.videoid 
+        self.mainurl = pyAudioConfig.youtubevideourl + self.GetVideoIdValue() 
         return self.mainurl
     
     def SetVideoUrl (self, inurl): 
