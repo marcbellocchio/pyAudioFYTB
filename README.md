@@ -47,6 +47,13 @@ http://youtube.com/watch?v=9bZkp7q19f0
 - [ ] dockers ?
 
 # Install
-## Windows
+- Windows
+wip
+
+- Linux
+wip
+
+- Mac OS
+wip
 
 
