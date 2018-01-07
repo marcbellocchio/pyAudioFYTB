@@ -1,15 +1,15 @@
 # pyAudioFYTB
 from a list of song to audio files on disk.
-The objective is to transform a shopping list of songs (text format) to a directory of audio files (mp3, ogg, ....) on disk.
+The objective is to transform a shopping list of songs (text format) to a directory of audio files (mp3 with title and album metadata) on disk.
 
 # overall processing
 1. read the input text file
-2. for each line of the file, a youtube search is started to check if a video clip is available, then get the link of the video
-3. get video file details
-4. download the video on disk
-5. extract audio
+2. for each line of the file, a youtube search is started to check if a video clip or simple audio is available, then get the link of the file
+3. get file details
+4. download the file on disk
+5. extract audio and convert to mp3
 6. delete temporary files (video, convertion data)
-
+7. add to a playlist
 
 # APIs world
 
@@ -24,29 +24,27 @@ pytube is a lightweight, dependency-free Python library (and command-line utilit
 the starting point si to get a link to the video to use this code.
 http://youtube.com/watch?v=9bZkp7q19f0
 
-## youtube-dl
-https://github.com/rg3/youtube-dl/blob/master/README.md#installation
-youtube-dl is a command-line program to download videos from YouTube.com and a few more sites. It requires the Python interpreter, version 2.6, 2.7, or 3.2+, and it is not platform specific. It should work on your Unix box, on Windows or on Mac OS X. It is released to the public domain, which means you can modify it, redistribute it or use it however you like. 
-It allows to download files and start ffmpeg to extract audio
 
-# examples of code
-https://stackoverflow.com/questions/26495953/youtube-dl-python-library-documentation
 
 # Planning
 
 - [x] start it
 - [x] use python 3.x
 - [x] overall objectives and specification
+- [x] run on windows
 - [x] use pytest
 - [x] test pytube
-- [ ] ...
-- [ ] next ?
-- [ ] next ?
-- [ ] run on windows
+- [x] test google api
+- [x] manage python unit test
+- [x] first python code extracts  mp4 files
+- [x] run test using a list of 117 songs
+- [x] filter extra characters in the input list for robustness
+- [x] second python code extracts mp4 files and convert to mp3
+- [ ] test channel and playlist search to extract audio files
+
 - [ ] run on linux
 - [ ] run on mac OS
 - [ ] dockers ?
-- [ ] portable version
 
 
 
