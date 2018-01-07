@@ -37,7 +37,7 @@ http://youtube.com/watch?v=9bZkp7q19f0
 - [x] test google api
 - [x] manage python unit test
 - [x] first python code extracts  mp4 files
-- [x] run test using a list of 117 songs
+- [x] run test using a list of 116 songs
 - [x] filter extra characters in the input list for robustness
 - [x] second python code extracts mp4 files and convert to mp3
 - [ ] test playlist type search to get id of the playlist and get all the videos links using playlist items
@@ -51,12 +51,15 @@ http://youtube.com/watch?v=9bZkp7q19f0
 
 # Install
 - Windows
-wip
+
+  wip
 
 - Linux
-wip
+
+  wip
 
 - Mac OS
-wip
+
+  wip
 
 
