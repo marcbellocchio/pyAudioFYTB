@@ -6,7 +6,6 @@ Created on 24 nov. 2017
 from __future__                     import absolute_import
 from pyAudioConfig                  import  pyAudioConfig
 from pytube                         import YouTube
-import os
 import urllib.request 
 
 from pyAudioTqdmProgressBar         import pyAudioTqdmUpTo
@@ -24,10 +23,8 @@ class pyAudioVideos(object):
     from a videoid, generates an url
     from url get the various video format
     select the video format with best quality audio
-    dow,load the video
+    download the video
     ''' 
-
-
     def __init__(self, trackingobject, videoiddict):
         '''
         Constructor
@@ -67,7 +64,10 @@ class pyAudioVideos(object):
         return self.finalink  
     
     def SetFullDownloadName(self, audiooutdir, query):
-        # create a filename compatible with os
+        '''
+        create a filename compatible with os
+        remove non ascii character
+        '''
         outline = str("")
         az_range=range(97,123)
         AZ_range = range (65, 91)
@@ -90,7 +90,16 @@ class pyAudioVideos(object):
     def GetFullDownloadName(self):
         return self.fulldownloadname
             
+    def SetVideoIdValue(self, inval):
+        self.videoiddict[pyAudioConfig.dictvideoid] = inval
+        
+    def SetVideoIdDesc(self, inval):
+        self.videoiddict[pyAudioConfig.dictdescription] = inval
+            
     def SetVideoId(self, dictvid):
+        '''
+        initialise the dictionary using the dict returned by the search class
+        '''
         self.videoiddict     = dictvid  # dict
         
     def GetVideoIdStatus(self):
@@ -161,6 +170,8 @@ class pyAudioVideos(object):
         try:
             yt = YouTube(self.GetVideoUrl() )
             #yt.streams.filter(progressive=True).all()
+            #dict: {'status': 'fail', 'reason': 'Invalid parameters.', 'errorcode': '2'}
+            
             
             # try to find first a link with audio only, self.type is audio, self.subtype = mp4
             for stream in yt.streams.filter(only_audio=True).all():

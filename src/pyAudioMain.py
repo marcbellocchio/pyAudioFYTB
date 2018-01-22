@@ -64,6 +64,8 @@ class pyAudioMain(object):
         self.audiooutputdir     = None
         # name of the playlist
         self.playlist           = None
+            # title for google api result
+        self.title              = None
         
       
          
@@ -234,38 +236,89 @@ class pyAudioMain(object):
             while self.pyAS.SingleSearch() != None:
                 # progress bar
                 self.IncrementLineProgressBar()
-                # set video id in video class
-                self.pyAV.SetVideoId(self.pyAS.GetVideoId())
-                if (self.pyAV.IsVideoIdValid()):
-                    # get all possible links
-                    if (self.pyAV.SearchFinalLinks()):
-                        #create a name for the file stored on disk
-                        self.pyAV.SetFullDownloadName(self.GetAudioOutputDir(), self.pyAS.GetQuery())
-                        #download with progress bar
-                        self.pyAV.DownloadFromRealUrlWithProgressBar()
-                        # if the file is video and audio, start ffmpeg, extract audio 
-                        self.ExtractAudio()
-                        # add the short name to the playlist
-                        self.AddToPlayList()
-                        # CSV fr logging
-                        self.AddToCSV(self.pyAS.GetQuery(), self.pyAV.GetFinalLink(), self.pyAV.GetFullDownloadName())
-                    else:
-                        # final link not found shall be kept in tracking
-                        self.pyAT.SetError(self, sys._getframe().f_code.co_name, "cannot get final link for download, query is:",self.pyAS.GetQuery() )
-                        # CSV fr logging
-                        self.AddToCSV(self.pyAS.GetQuery(), "extended result" + self.pyAS.GetExtendedResult(), "not downloaded")
-                else:
-                    if(self.pyAS.IsVideoIdMissing() ): # if missing due to a query with empty result, store in trace
-                        warn = " >>> videoid is missing from query " + str(self.pyAS.GetQuery()) + str(self.pyAS.GetExtendedResult())
-                        self.pyAT.SetWarning(self, sys._getframe().f_code.co_name, warn)
+                # detect if video has been detected
+                typeofquery = self.pyAS.GetQueryType()
+                if (typeofquery == pyAudioConfig.youtubesearchvideo):
+                    self.DownloadVideo()
+                if(typeofquery == pyAudioConfig.youtubesearchplaylist):
+                    self.DownloadPlaylist()
             self.pyAS.CloseInputFile()
             print("end of pyAudio Grabber, thank you for using!")
             
         else:
             print("cannot open input file" + self.GetInputListName())
-        pass
         
+    def DownloadVideo(self):  
+        '''
+        get the links to the file when video id is valid
+        get audio
+        update input playlist
+        do nothing when video id is not valid
+        '''
+        # set video id in video class
+        self.pyAV.SetVideoId(self.pyAS.GetVideoId())
+        if (self.pyAV.IsVideoIdValid()):
+            # get all possible links
+            if (self.pyAV.SearchFinalLinks()):
+                #create a name for the file stored on disk
+                self.pyAV.SetFullDownloadName(self.GetAudioOutputDir(), self.pyAS.GetQuery())
+                #download with progress bar
+                self.pyAV.DownloadFromRealUrlWithProgressBar()
+                # if the file is video and audio, start ffmpeg, extract audio 
+                self.ExtractAudio()
+                # add the short name to the playlist
+                self.AddToPlayList()
+                # CSV fr logging
+                self.AddToCSV(self.pyAS.GetQuery(), self.pyAV.GetFinalLink(), self.pyAV.GetFullDownloadName())
+            else:
+                # final link not found shall be kept in tracking
+                error = "cannot get final link for download, query is:" + self.pyAS.GetQuery()
+                self.pyAT.SetError(self, sys._getframe().f_code.co_name, error )
+                # CSV fr logging
+                self.AddToCSV(self.pyAS.GetQuery(), "extended result" + "cannot get final link for download", "not downloaded")
+        else:
+            if(self.pyAS.IsVideoIdMissing() ): # if missing due to a query with empty result, store in trace
+                warn = " >>> videoid is missing from query " + str(self.pyAS.GetQuery()) + str(self.pyAS.GetExtendedResult())
+                self.pyAT.SetWarning(self, sys._getframe().f_code.co_name, warn)
 
+    def DownloadPlaylist(self):
+        '''
+        from the playlist id get all the items and download all of them
+        '''
+        # from pyaudiosearch get the id of the playlist
+        # start searching for all items in the playlist
+        self.pyAS.PlayListItemsSearchQuery()
+        listofresults   = self.pyAS.GetListOfResults()
+        totalofitems    = int(self.pyAS.GetTotalResults())
+        currentitem     = 0
+        self.pyAV.SetVideoId(self.pyAS.GetVideoId())
+
+        for swarmres in listofresults: # looping all list items
+            for search_result in swarmres.get('items', []): # for one list item, parse the whole dict
+                currentitem+=1
+                print(" now collecting item n: ", currentitem, "over ", totalofitems , " items")
+                self.pyAV.SetVideoIdValue(search_result['contentDetails']['videoId'])
+                self.pyAV.SetVideoIdDesc(search_result['snippet']['description'])
+                self.title          = search_result['snippet']['title']                     # used a main filename
+                # get all possible links
+                if (self.pyAV.SearchFinalLinks()):
+                    #create a name for the file stored on disk
+                    self.pyAV.SetFullDownloadName(self.GetAudioOutputDir(), self.title)
+                    #download with progress bar
+                    self.pyAV.DownloadFromRealUrlWithProgressBar()
+                    # if the file is video and audio, start ffmpeg, extract audio 
+                    self.ExtractAudio()
+                    # add the short name to the playlist
+                    self.AddToPlayList()
+                    # CSV fr logging
+                    self.AddToCSV(self.title , self.pyAV.GetFinalLink(), self.pyAV.GetFullDownloadName())
+                else:
+                    # final link not found shall be kept in tracking
+                    self.pyAT.SetError(self, sys._getframe().f_code.co_name, "cannot get final link for download, title is:",self.title )
+                    # CSV fr logging
+                    self.AddToCSV(self.title, "extended result" + search_result, "not downloaded")
+        
+    
 def main(argv):
     
     parser = argparse.ArgumentParser(description='list of song and singer to audio files')

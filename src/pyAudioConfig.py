@@ -33,17 +33,22 @@ class pyAudioConfig():
     
     # global settings
     undefined                           = "undefined"
-    missingvideoid                      = "missingafterquery"   # value for the key status, when a query has been done and the result is empty    
-    missingvideoidasblankquery          = "missingblank"        # value for the key status, when a query cannot be done as the input line is empty
-    nonevideoid                         = "noquerysearch"       # start dictstatus value or when the end of the input file has been reach, 
+    playlisttag                         = "#playlist#"          # magic tag to inform the tool that the query mention a playlist, all items shall be downloaded
+    missingid                           = "missingafterquery"   # value for the key status, when a query has been done and the result is empty    
+    missingidasblankquery               = "missingblank"        # value for the key status, when a query cannot be done as the input line is empty
+    missingidaserror                    = "missinggooglerror"   # error from google api
+    playlistquery                       = "playlistquery"       # magic word for playlist detected
+    noid                                = "noquerysearch"       # start dictstatus value or when the end of the input file has been reached, 
     validvideoId                        = "ok"                  # value of dictstatus when the videoid value can be used in url
     dictvideoid                         = "videoId"             # key for the dict videoid, identifier
+    dictplaylistid                      = "playlistId"          # key for the dict playlistid, identifier
     dictstatus                          = "status"              # key for the dict videoid, status
     dictdescription                     = "desc"                # key for the dict videoid, video description
     stringtrailingpadding               = 30
-    youtubevideourl                     = "https:\\youtube.com\watch?v="
+    youtubevideourl                     = "https://youtube.com/watch?v="
     youtubemaxresult                    = 1
-    youtubesearchtype                   = "video"
+    youtubesearchvideo                  = "video"
+    youtubesearchplaylist               = "playlist"    
     youtubevideoIDkey                   = " 'items'][0]['id']['videoId' "
     mp3extension                        = "mp3"
     mp4extension                        = "mp4"

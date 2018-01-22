@@ -64,21 +64,104 @@ class pyAudioSearch(object):
         store object pymain to get input parameters
         '''
         # object that will manage errors, infos
-        self.tracking       = trackingobject
+        self.tracking           = trackingobject
         # youtube search result of video id coded as dict
-        self.ytsvideoidict  = dict([(pyAudioConfig.dictstatus, None), (pyAudioConfig.dictvideoid, None) , (pyAudioConfig.dictdescription, None)])
-        # extended result stored the query result
-        self.extendedresult = None
+        self.ytsvideoidict      = dict([(pyAudioConfig.dictstatus, None), (pyAudioConfig.dictvideoid, None) , (pyAudioConfig.dictdescription, None)])
+        # youtube search result of playlist id coded as dict
+        self.ytsplaylistidict   = dict([(pyAudioConfig.dictstatus, None), (pyAudioConfig.dictplaylistid, None) , (pyAudioConfig.dictdescription, None)])
+        # extended result stored the query result of video or playlist
+        self.extendedresult     = None
         # input list object
-        self.pyAL           = pyAudioInputList (self.tracking , pymain.GetInputListName())
+        self.pyAL               = pyAudioInputList (self.tracking , pymain.GetInputListName())
         # youtube object to use api and lock for videos
-        self.youtube        = None
+        self.youtube            = None
         # store py main object created in main file
-        self.pyMain         = pymain
+        self.pyMain             = pymain
         # query a line of text from the input file
-        self.query          = None
+        self.query              = None
+        # type of the query
+        self.querytype          = None
+        # number of items collected in one api call
+        self.resultperpage      = None
+        # maximum number of results, shall be collected using several api calls
+        self.totalresults       = None
+        # list of extended results
+        self.listofextresults   = list()
         
+    def GetTotalResults(self):
+        return self.totalresults
+
+    def GetListOfResults(self):
+        return self.listofextresults
+    
+    def IsVideoIdMissing(self):
+        '''
+        return true when the videoid is not valid as the result of the query is empty
+        '''
+        val = False
+        if (self.GetVideoIdStatus() == pyAudioConfig.missingid):
+            val = True
+        return val
+    
+    def IsVideoIdBlank(self):
+        '''
+        return true when the videoid cannot be used due to a query not done
+        '''
+        val = False
+        if (self.GetVideoIdStatus() == pyAudioConfig.missingidasblankquery):
+            val = True
+        return val
+    
+    def SetPlayListId(self, status, inId):
+        self.ytsplaylistidict[pyAudioConfig.dictstatus]     = status
+        self.ytsplaylistidict[pyAudioConfig.dictplaylistid] = inId
         
+    def GetPlayListId(self):
+        return self.ytsplaylistidict[pyAudioConfig.dictplaylistid]       
+
+    def SetPlayListIdDesc(self, descrip):
+        self.ytsplaylistidict[pyAudioConfig.dictdescription] = descrip
+        
+    def GetPlayListIdDesc(self):
+        return self.ytsplaylistidict[pyAudioConfig.dictdescription]
+
+    def GetVideoId(self):
+        return self.ytsvideoidict  # return dict
+    
+    def SetVideoId(self, status, inId):
+        
+        self.ytsvideoidict[pyAudioConfig.dictstatus] = status
+        self.ytsvideoidict[pyAudioConfig.dictvideoid] = inId
+        
+    def SetVideoIdDesc(self, descrip):
+        self.ytsvideoidict[pyAudioConfig.dictdescription] = descrip
+        
+    def GetVideoIdDesc(self):
+        return self.ytsvideoidict[pyAudioConfig.dictdescription]    
+           
+    def GetVideoIdStatus(self):
+        return self.ytsvideoidict[pyAudioConfig.dictstatus]
+           
+    def SetExtendedResult(self, result): 
+        '''
+        used to reset the result or to initialise it
+        ''' 
+        self.extendedresult = result 
+            
+    def GetExtendedResult(self):  
+        '''
+        call it when it is necessary to be inform of the full result of the single search
+        '''
+        return self.extendedresult  
+     
+    def SetQueryType(self, intype):
+        self.querytype  = intype
+        
+    def GetQueryType(self):
+        return self.querytype
+        
+    def GetYouTube(self):
+        return  self.youtube
     
     def GetQuery(self):
         return self.query
@@ -108,28 +191,38 @@ class pyAudioSearch(object):
         then call the search api of youtube
         finally report the videoId collected from the api response
         return None when finished  
+        return missingvideoidasblankquery when the collected line is empty
         '''
-        self.SetVideoId(pyAudioConfig.nonevideoid, 0)
+        self.SetVideoId(pyAudioConfig.noid, 0)
+        self.SetPlayListId(pyAudioConfig.noid, 0)
         returnval           = None
         self.extendedresult = None
+        self.SetQueryType(pyAudioConfig.undefined)
         # read a line of text from the input file
         self.SetQuery(self.pyAL.GetLine())
         #("single search query ", str(self.query))
         if ( (self.GetQuery() != None) and (self.GetQuery() != "")  ) :
             try:       
                 returnval = True
-                detectemptyline = str(self.query).strip()        
+                detectemptyline = str(self.GetQuery()).strip()        
                 if( (detectemptyline != "\n") and  (detectemptyline != "") ):# no need to start searching
-                    self.extendedresult = self.youtube.search().list(
-                        q=self.GetQuery(),                    # query contains the line of text words (song interpret for example)
-                        type='video',               # only video shall be collected
-                        part='id,snippet',          # request both id and request object in the response
-                        key=self.pyMain.GetDevKey(),# dev key 2500 query per day for free
-                        maxResults=1                # single result as best hit at the beginning of the result
-                      ).execute()
-                    self.ExtractVideoId()
-                else:
-                    self.SetVideoId(pyAudioConfig.missingvideoidasblankquery, 0) # \n detected so videoID is missing for blank query
+                    # here the detection of the search for a playlist:
+                    if (detectemptyline.find(pyAudioConfig.playlisttag) >= 0):
+                        # playlist detected, remove tag from the query
+                        playlistquery   = detectemptyline.strip(pyAudioConfig.playlisttag)
+                        if( (playlistquery != "\n") and  (playlistquery != "") ):
+                            self.SetQuery(playlistquery)# save without the playlist code
+                            self.PlaylistSearchQuery()
+                            self.ExtractPlaylistId()
+                        else:
+                            # not a real query
+                            self.SetPlayListId(pyAudioConfig.missingidasblankquery, 0)
+                    else:# video query detected
+                        self.VideoSearchQuery()
+                        self.ExtractVideoId()
+                else: # detected a line that is not a real query
+                    self.SetVideoId(pyAudioConfig.missingidasblankquery, 0) # \n detected so videoID is missing for blank query
+                    self.SetPlayListId(pyAudioConfig.missingidasblankquery, 0)
             except:
                 self.tracking.SetError(self, sys._getframe().f_code.co_name, "error while calling youtube search" )
             finally:
@@ -137,40 +230,79 @@ class pyAudioSearch(object):
         else:
             return returnval   # at the end of the input list 
               
-    def GetVideoId(self):
-        return self.ytsvideoidict  # return dict
-    
-    def GetVideoIdStatus(self):
-        return self.ytsvideoidict[pyAudioConfig.dictstatus]
-    
-    def IsVideoIdMissing(self):
+    def VideoSearchQuery(self):
         '''
-        return true when the videoid is not valid as the result of the query is empty
+        use youtube search api to collect information about a video identified by a text query
         '''
-        val = False
-        if (self.GetVideoIdStatus() == pyAudioConfig.missingvideoid):
-            val = True
-        return val
-    
-    def IsVideoIdBlank(self):
-        '''
-        return true when the videoid cannot be used due to a query not done
-        '''
-        val = False
-        if (self.GetVideoIdStatus() == pyAudioConfig.missingvideoidasblankquery):
-            val = True
-        return val
-    
-    def SetVideoId(self, status, inId):
+        self.SetQueryType(pyAudioConfig.youtubesearchvideo)
+        self.SetExtendedResult(self.youtube.search().list(
+            q=self.GetQuery(),                      # query contains the line of text words (song interpret for example)
+            type=self.GetQueryType(),               # only video shall be collected
+            part='id,snippet',                      # request both id and request object in the response
+            key=self.pyMain.GetDevKey(),            # dev key 2500 query per day for free
+            maxResults=1                            # single result as best hit at the beginning of the result
+          ).execute() )
         
-        self.ytsvideoidict[pyAudioConfig.dictstatus] = status
-        self.ytsvideoidict[pyAudioConfig.dictvideoid] = inId
+    def PlaylistSearchQuery(self):
+        '''
+        use youtube search api to collect information about a playlist identified by a text query
+        '''  
+        self.SetQueryType(pyAudioConfig.youtubesearchplaylist)
+        self.SetExtendedResult(self.youtube.search().list(
+            q=self.GetQuery(),                          # query contains the line of text words (song interpret for example)
+            type=self.GetQueryType(),                   # only playlist shall be collected
+            part='id,snippet',                          # request both id and request object in the response
+            key=self.pyMain.GetDevKey(),                # dev key 2500 query per day for free
+            maxResults=1                                # single result as best hit at the beginning of the result
+          ).execute() )
+                      
+    def PlayListItemsSearchQuery(self):
+        '''
+        use playlistItems api to get all the items of a playlist identifier using GetPlayListId()
+        '''
+        self.SetExtendedResult(self.youtube.playlistItems().list(
+            part='snippet,contentDetails',
+            maxResults=50,
+            playlistId = self.GetPlayListId()
+          ).execute())
+        # now if extendedresult contains data, they shall be parsed to collect the whole items
+        # detect number of results
+        getout = 0
+        self.nextpagetoken = "empty"
+        for mykey, value in self.GetExtendedResult().items():
+            if mykey == 'pageInfo':
+                self.resultperpage = value.get('resultsPerPage')
+                self.totalresults  = value.get('totalResults')
+                getout     +=1 
+            # get token
+            if mykey == 'nextPageToken':   
+                self.nextpagetoken  = value
+                getout     +=1 
+            if getout == 2 :
+                break
         
-    def SetVideoIdDesc(self, descrip):
-        self.ytsvideoidict[pyAudioConfig.dictdescription] = descrip
+        self.listofextresults.append(self.GetExtendedResult())
         
-    def GetVideoIdDesc(self):
-        return self.ytsvideoidict[pyAudioConfig.dictdescription]
+        while (self.nextpagetoken != "empty"):
+            self.SetExtendedResult(self.youtube.playlistItems().list(
+            part='snippet,contentDetails',
+            maxResults=50,
+            playlistId = self.GetPlayListId(),
+            pageToken = self.nextpagetoken
+            ).execute())
+          
+            self.listofextresults.append(self.extendedresult)
+            self.getout = 0
+            self.nextpagetoken = "empty"
+            for mykey, value in self.extendedresult.items():
+                # get token
+                if mykey == 'nextPageToken':   
+                    self.nextpagetoken  = value
+                    self.getout     +=1 
+                if self.getout == 1 :
+                    break
+        
+
         
     def ExtractVideoIdJson(self):
         '''
@@ -197,7 +329,7 @@ class pyAudioSearch(object):
             #print("json object", jsonob)
             # shall find the key videoId in the json
             try:     
-                self.SetVideoId(pyAudioConfig.missingvideoid, 0) # missing as the query result has not been parsed
+                self.SetVideoId(pyAudioConfig.missingid, 0) # missing as the query result has not been parsed
                 
                 for search_result in jsonob.get('items', []):
                     self.SetVideoId(pyAudioConfig.validvideoId, search_result['id']['videoId'])# videoid ok
@@ -207,13 +339,28 @@ class pyAudioSearch(object):
                 error = "cannot get the id of the video from jsonobject: " + str(jsonob) + "query is : " + str(self.GetQuery())
                 self.tracking.SetError(self, sys._getframe().f_code.co_name, error  )
             
+    def ExtractPlaylistId(self):
 
+        if ((self.GetExtendedResult() != None) and (self.GetExtendedResult() != "") ):
+
+            try:     
+                self.SetPlayListId(pyAudioConfig.missingid, 0) # missing as the query result has not been parsed
+                self.SetPlayListIdDesc("")
+                # manage error in extended result, 
+                for search_result in self.GetExtendedResult().get('items', []):
+                    self.SetPlayListId(pyAudioConfig.validvideoId, search_result['id']['playlistId']) # get playlist id in the result
+                    self.SetPlayListIdDesc(search_result['snippet']['description']) # description to be used for next call 
+                    break                   
+            except :
+                error = "cannot get the id of the playlist from jsonobject: " + str(self.GetExtendedResult()) + "query is : " + str(self.GetQuery())
+                self.tracking.SetError(self, sys._getframe().f_code.co_name, error  )
+   
 
     def ExtractVideoId(self):
         '''
-        extract videoid from extended result
+        extract videoid from extended result after a call to the youtube api
         https://github.com/youtube/api-samples/blob/master/python/search.py for parsing
-        ...
+        
          "items": [
               {
                "kind": "youtube#searchResult",
@@ -223,14 +370,18 @@ class pyAudioSearch(object):
                 "videoId": "L3wKzyIN1yk"
                },
                https://docs.python.org/2/library/re.html#
-        ...
+               
+               https://console.cloud.google.com/home/dashboard?project=musicsearchtofile&pli=1
+        return the videoid from the extended result
+        return missingvideoid when the response isempty and the videoid field is missing
         '''
         # extended result is a dict returned by youtube api
         if ((self.GetExtendedResult() != None) and (self.GetExtendedResult() != "") ):
 
             try:     
-                self.SetVideoId(pyAudioConfig.missingvideoid, 0) # missing as the query result has not been parsed
+                self.SetVideoId(pyAudioConfig.missingid, 0) # missing as the query result has not been parsed
                 self.SetVideoIdDesc("")
+                # manage error in extended result, 
                 for search_result in self.GetExtendedResult().get('items', []):
                     self.SetVideoId(pyAudioConfig.validvideoId, search_result['id']['videoId'])# videoid ok
                     self.SetVideoIdDesc(search_result['snippet']['description']) # description to be used as idtag for audio
@@ -238,16 +389,3 @@ class pyAudioSearch(object):
             except :
                 error = "cannot get the id of the video from jsonobject: " + str(self.GetExtendedResult()) + "query is : " + str(self.GetQuery())
                 self.tracking.SetError(self, sys._getframe().f_code.co_name, error  )
-            
-           
-    def SetExtendedResult(self, result): 
-        '''
-        used to reset the result or to initialise it
-        ''' 
-        self.extendedresult = result 
-            
-    def GetExtendedResult(self):  
-        '''
-        call it when it is necessary to be inform of the full result of the single search
-        '''
-        return self.extendedresult 

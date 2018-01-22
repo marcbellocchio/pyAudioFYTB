@@ -42,7 +42,7 @@ class pyAudioInputList(object):
     
     def GetLine(self):
         """
-        read a line from the inpout file
+        read a line from the inpout file without any processing 
         """
         retline = None
         outline = None
@@ -90,15 +90,6 @@ class pyAudioInputList(object):
                         if(ord(retline[i]) < 128):
                             outline = "".join([outline,retline[i]])
                     '''       
-                        
-                        
-                        
-                    
-                #outline2 = outline1.replace("\\","")
-                #outline = outline2.replace("@","")
-                #outline = retline.replace("\\","_")
-                #outline = retline.replace("@","_")
-                #retline = retline.strip('\\')
             return   outline
             #return unicodedata.normalize('NFKD', outline).encode('ascii','ignore')
   
