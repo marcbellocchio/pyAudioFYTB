@@ -6,7 +6,7 @@ Created on 12 nov. 2017
 #from pyAudioTracking import pyAudioTracking
 #from time import   strftime, localtime
 import sys
-import unicodedata 
+#import unicodedata 
 import locale
 
 

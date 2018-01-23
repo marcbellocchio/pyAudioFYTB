@@ -35,48 +35,62 @@ class pyAudioFFmpeg(object):
         self.audioexttostrip            = None   # after the youtube search the audio extension mp4, opus, is automatically added to the object video
         self.title                      = None   # title of the song
         self.shortnamemp3               = None
-       
-       
+
+
+    def StripString(self, instr):
+        '''
+        remove strange character from input str
+        used when collected title, description from youtube contains #, "" '``
+        '''
+        pass
+        outstr = str(instr)
+        outstr = outstr.replace('#',' ')
+        outstr = outstr.replace('`',' ')
+        outstr = outstr.replace('"',' ')
+        outstr = outstr.replace('\'',' ')
+        return outstr
+
     def GetShortNameMp3(self):
         return self.shortnamemp3
-       
+
     def SetShortNameMp3(self, insn):
-        self.shortnamemp3 = insn
-       
+        self.shortnamemp3 = self.StripString(insn)
+
     def SetTitle(self, intitle):
-        self.title = intitle
-        
+        self.title = self.StripString(intitle)
+
     def GetTitle(self ):
         return self.title
-       
+
     def SetAudioExtToStrip(self, inaudiodesc):
-        self.audioexttostrip = inaudiodesc
-        
-        
+        self.audioexttostrip = self.StripString(inaudiodesc)
+
+
     def GetAudioExtToStrip(self):
         return self.audioexttostrip
-        
-        
+
     def SetAlbumDesc(self, inalbum):
-        self.album = inalbum
-        
-    def GetAlbumDesc(self): 
+        self.album = self.StripString(inalbum)
+        if(len(self.album) > 70): #limit the string length to avoid strange artefact in audio player
+            self.album = str(self.album[0:69])
+
+    def GetAlbumDesc(self):
         return self.album
-        
-    def SetInputFile (self, inputf):  
+
+    def SetInputFile (self, inputf):
         self.inputfile     = inputf
-        
+
     def GetInputFile(self):
         return self.inputfile
-    
+
     def GetOutputFile(self):
         return self.outputfile
-    
+
     def SetOutputFile (self, outf):
         self.outputfile  = outf
-        
 
-    def CreateCommandMp4ToMp3(self): 
+
+    def CreateCommandMp4ToMp3(self):
         '''
         generate the command with input and output parameters
         will be used by RUN
@@ -84,20 +98,20 @@ class pyAudioFFmpeg(object):
         ffmpeg -i input -id3v2_version 3 -c:a libmp3lame -b:a 128k -metadata title="..." -metadata album="from test ffmepg"  -y output
         remove initial audio extension from the output file to add only mp3
         self.ffmpeg is initialised by the function DetectOsPlatform
-        '''        
+        '''
         stripstr = str(self.GetAudioExtToStrip() + pyAudioConfig.extractfromffmpegext)
         filenamemp3 = str(self.GetOutputFile()).strip(stripstr) + pyAudioConfig.mp3extension
         self.SetShortNameMp3(os.path.basename(filenamemp3)) # get only the tail of the path to store it in the playlist
         self.commandmp4tomp3     = self.ffmpeg + " -i " + "\"" + self.GetInputFile() + "\"" + " -id3v2_version 3 -c:a libmp3lame -b:a 128k -metadata title=" + "\""  + self.GetTitle()  + "\""  + " -metadata album=" + "\""  + self.GetAlbumDesc()  + "\""  + " -y " + "\"" + filenamemp3  + "\""
-     
+
 
     def RunConvertToMp3(self):
         '''
         execute ffmpeg in a sub process
         command shall be created before
         any audio input to mp3 with metadata
-        '''   
-        #print("starting ffmpeg to convert to mp3 :" + self.GetInputFile()) 
+        '''
+        #print("starting ffmpeg to convert to mp3 :" + self.GetInputFile())
         handle = None
         try:
             handle = subprocess.Popen(self.commandmp4tomp3, stderr=DEVNULL, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -121,25 +135,25 @@ class pyAudioFFmpeg(object):
                 self.tracking.SetError(self, sys._getframe().f_code.co_name, errorfile )
 
 
-    def CreateCommandExtractAudio(self): 
+    def CreateCommandExtractAudio(self):
         '''
         generate the command with input and output parameters
         will be used by RUN
         to extract only audio
         ffmpeg -i inputfile (freshly downloaded) -vn -acodec copy output-audio.aac
-        
-        '''        
-        
+
+        '''
+
         self.commandextractaudio = self.ffmpeg + " -i " + "\"" + self.GetInputFile() + "\"" + " -vn -acodec copy -y " + "\"" +  self.GetOutputFile() + "\""
-        
-     
-        
+
+
+
     def RunExtractAudio(self):
         '''
         execute ffmpeg in a sub process
         command shall be created before
-        '''   
-        print("starting ffmpeg to extract audio from :" + self.GetInputFile()) 
+        '''
+        print("starting ffmpeg to extract audio from :" + self.GetInputFile())
         handle = None
         try:
             handle = subprocess.Popen(self.commandextractaudio, stderr=DEVNULL, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -175,7 +189,7 @@ class pyAudioFFmpeg(object):
             if(WhatOS.IsLinux()):
                 self.ffmpeg = pyAudioConfig.ffmpegexec_linux
             if(WhatOS.IsMac()):
-                self.ffmpeg = pyAudioConfig.ffmpegexec_mac   
+                self.ffmpeg = pyAudioConfig.ffmpegexec_mac
         except:
                 errorfile = "cannot detect the os platform for input file" + str(self.GetInputFile())
                 self.tracking.SetError(self, sys._getframe().f_code.co_name, errorfile )

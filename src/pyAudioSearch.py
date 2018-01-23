@@ -229,6 +229,9 @@ class pyAudioSearch(object):
                 return returnval # True to say that the end of the input list is not here
         else:
             return returnval   # at the end of the input list 
+      
+
+        
               
     def VideoSearchQuery(self):
         '''
@@ -248,6 +251,7 @@ class pyAudioSearch(object):
         use youtube search api to collect information about a playlist identified by a text query
         '''  
         self.SetQueryType(pyAudioConfig.youtubesearchplaylist)
+        #self.SetQuery(self.StripString(self.GetQuery())) # remove strange character in query
         self.SetExtendedResult(self.youtube.search().list(
             q=self.GetQuery(),                          # query contains the line of text words (song interpret for example)
             type=self.GetQueryType(),                   # only playlist shall be collected
@@ -302,43 +306,6 @@ class pyAudioSearch(object):
                 if self.getout == 1 :
                     break
         
-
-        
-    def ExtractVideoIdJson(self):
-        '''
-        extract videoid from extended result
-        https://github.com/youtube/api-samples/blob/master/python/search.py for parsing
-        ...
-         "items": [
-              {
-               "kind": "youtube#searchResult",
-               "etag": "\"ld9biNPKjAjgjV7EZ4EKeEGrhao/pDl8RYaBDoe0zRXuTWl3ClFmMtk\"",
-               "id": {
-                "kind": "youtube#video",
-                "videoId": "L3wKzyIN1yk"
-               },
-               
-        ...
-        '''
-        # create json object
-        if ((self.GetExtendedResult()() != None) and (self.GetExtendedResult() != "") ):
-            strfromdict = json.dumps(self.GetExtendedResult())  # create the json using dumps as the results is a dict
-            #print("strfromdict:", strfromdict)
-            #print ("video id from dict", self.extendedresult.get('videoId'))
-            jsonob = json.loads(strfromdict)
-            #print("json object", jsonob)
-            # shall find the key videoId in the json
-            try:     
-                self.SetVideoId(pyAudioConfig.missingid, 0) # missing as the query result has not been parsed
-                
-                for search_result in jsonob.get('items', []):
-                    self.SetVideoId(pyAudioConfig.validvideoId, search_result['id']['videoId'])# videoid ok
-
-                    break
-            except :
-                error = "cannot get the id of the video from jsonobject: " + str(jsonob) + "query is : " + str(self.GetQuery())
-                self.tracking.SetError(self, sys._getframe().f_code.co_name, error  )
-            
     def ExtractPlaylistId(self):
 
         if ((self.GetExtendedResult() != None) and (self.GetExtendedResult() != "") ):
