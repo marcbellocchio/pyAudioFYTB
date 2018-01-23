@@ -67,7 +67,13 @@ http://youtube.com/watch?v=9bZkp7q19f0
    httplib2: 
    pip3 install httplib2 --upgrade
 
-   wip
+   google dev key:  
+   https://docs.simplecalendar.io/google-api-key/
+   
+   typical command line, don't define a path for the playlist, it will be stored in the audio output directory
+   
+   <yourpath>\python.exe <yourpath>\pyAudioMain.py --inputlist <yourpath>\myinput.txt --devkey <yourgooglekey>  --audiooutdir <yourpath>  --playlist mytestplaylist.m3u8
+
 
 - Linux
 
