@@ -52,6 +52,9 @@ http://youtube.com/watch?v=9bZkp7q19f0
 # Install
 - Windows
  
+   python:  
+   https://www.python.org/downloads/release/python-364/
+   
    google api:  
    pip install --upgrade google-api-python-client
  
