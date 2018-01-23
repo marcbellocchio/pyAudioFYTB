@@ -72,7 +72,7 @@ http://youtube.com/watch?v=9bZkp7q19f0
    
    typical command line, don't define a path for the playlist, it will be stored in the audio output directory
    
-   <yourpath>\python.exe <yourpath>\pyAudioMain.py --inputlist <yourpath>\myinput.txt --devkey <yourgooglekey>  --audiooutdir <yourpath>  --playlist mytestplaylist.m3u8
+   \<yourpath\>\python.exe <yourpath>\pyAudioMain.py --inputlist <yourpath>\myinput.txt --devkey <yourgooglekey>  --audiooutdir <yourpath>  --playlist mytestplaylist.m3u8
 
 
 - Linux
