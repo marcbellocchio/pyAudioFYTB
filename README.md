@@ -52,17 +52,17 @@ http://youtube.com/watch?v=9bZkp7q19f0
 # Install
 - Windows
  
- google api
- pip install --upgrade google-api-python-client
+   google api
+   pip install --upgrade google-api-python-client
  
- six 
- pip install --upgrade six
+   six 
+   pip install --upgrade six
  
- progress bar
- pip install tqdm
+   progress bar
+   pip install --upgrade tqdm
  
- httplib2
- pip3 install httplib2 --upgrade
+   httplib2
+   pip3 install httplib2 --upgrade
 
   wip
 
