@@ -21,22 +21,10 @@ import sys
 
 class pyAudioMain(object):
     '''
-    """pyAudioFromYoutube
     
     from a list of song to audio files on disk.
     The objective is to transform a shopping list of songs in text to a directory of audio files (mp3, ogg, ....) on disk.
-    
-    Usage: python kgp.py [options] [source]
-    
-    Options:
-      -l ..., --inputlist  use input list of song and singer
-      -h, --help              show this help
-    
-    
-    Examples:
-      pyAudioMain.py      -l list.txt            
-    
-    """
+
     '''
     def __init__(self, params):
         '''
@@ -105,8 +93,6 @@ class pyAudioMain(object):
     def GetPlayList(self): 
         return self.playlist 
 
-     
-     
     # definition of property for fun
     metadata = property (_GetMetadata,_SetMetaData )
         
@@ -138,9 +124,7 @@ class pyAudioMain(object):
                 self.SetPlayList(argus.playlist)  
             else:
                 self.SetPlayList(pyAudioConfig.playlistname)
-
-                
-                           
+            
         except:
             self.pyAT.SetError(self, sys._getframe().f_code.co_name, "wrong arguments" + str(argus) )
     
@@ -156,8 +140,6 @@ class pyAudioMain(object):
         except:
             error = "cannot add to CSV: query: "+ query
             self.pyAT.SetError(self, sys._getframe().f_code.co_name, error  )
-        
-        
         
     def AddToPlayList(self):
         '''
@@ -182,24 +164,30 @@ class pyAudioMain(object):
 
     def ExtractAudio(self):
         '''
-        extract audio from a file
+        encode the audio in mp3 with idtag
+        extract audio from a file that contains both video and audio when necessary
         '''
         sffmpeg = pyAudioFFmpeg(self.pyAT)
+        # detecting OS to get the correct link to ffmpeg in configuration file
         sffmpeg.DetectOsPlatform()
         sffmpeg.SetInputFile(self.pyAV.GetFullDownloadName())
+        # output file will be deleted after the process, to the extension is weird
         sffmpeg.SetOutputFile(self.pyAV.GetFullDownloadName() + pyAudioConfig.extractfromffmpegext)
         if not self.pyAV.IsAudioFile():
-            # extract audio with ffmpeg
+            # extract audio with ffmpeg from video+audio input file
             sffmpeg.CreateCommandExtractAudio()
             sffmpeg.RunExtractAudio()
             sffmpeg.SetInputFile(sffmpeg.GetOutputFile())
         
-        # by default generate mp3 with metadata title album
+        # by default generate mp3 with metadata title&album
         strtostrip = "." + pyAudioConfig.mp4extension
+        # remove audio extension in title
         sffmpeg.SetTitle(str(self.pyAV.GetShortName()).rstrip(strtostrip))
         sffmpeg.SetAlbumDesc(self.pyAS.GetVideoIdDesc())
         sffmpeg.SetAudioExtToStrip(self.pyAV.GetAudioExt())
+        # prepare the ffmpeg command without running ffmpeg
         sffmpeg.CreateCommandMp4ToMp3()
+        # run conversion
         sffmpeg.RunConvertToMp3()
         # set the short name to be used in the playlist
         self.pyAV.SetShortName(sffmpeg.GetShortNameMp3())
@@ -213,8 +201,8 @@ class pyAudioMain(object):
               
     def Start(self):
         '''
-        start the query based on the input list
         called from main, this is the core function of the program
+        parse input list to generate a query using google api
         '''
         print("python program is starting ...")
         # object that manage input list
@@ -243,14 +231,14 @@ class pyAudioMain(object):
                 if(typeofquery == pyAudioConfig.youtubesearchplaylist):
                     self.DownloadPlaylist()
             self.pyAS.CloseInputFile()
-            print("end of pyAudio Grabber, thank you for using!")
+            print("end of pyAudio Grabber, thank you for using it!")
             
         else:
             print("cannot open input file" + self.GetInputListName())
         
     def DownloadVideo(self):  
         '''
-        get the links to the file when video id is valid
+        get the links to the file when videoid is valid
         get audio
         update input playlist
         do nothing when video id is not valid
@@ -284,22 +272,29 @@ class pyAudioMain(object):
     def DownloadPlaylist(self):
         '''
         from the playlist id get all the items and download all of them
+        a valid playlist id is needed to start this function
         '''
         # from pyaudiosearch get the id of the playlist
         # start searching for all items in the playlist
         self.pyAS.PlayListItemsSearchQuery()
+        # now getting the whole package of results to check if some valid videoid exist
         listofresults   = self.pyAS.GetListOfResults()
+        # number of file to get
         totalofitems    = int(self.pyAS.GetTotalResults())
         currentitem     = 0
+        # get the dict of search class
         self.pyAV.SetVideoId(self.pyAS.GetVideoId())
 
         for swarmres in listofresults: # looping all list items
-            for search_result in swarmres.get('items', []): # for one list item, parse the whole dict
+            for search_result in swarmres.get('items', []): 
+                # for one list item, parse the whole dict
                 currentitem+=1
+                # inform end user about current item being processed in playlist
                 print(" now collecting item n: ", currentitem, "over ", totalofitems , " items")
                 self.pyAV.SetVideoIdValue(search_result['contentDetails']['videoId'])
                 self.pyAV.SetVideoIdDesc(search_result['snippet']['description'])
-                self.title          = search_result['snippet']['title']                     # used a main filename
+                # title used a main filename
+                self.title          = search_result['snippet']['title']                     
                 # get all possible links
                 if (self.pyAV.SearchFinalLinks()):
                     #create a name for the file stored on disk
@@ -325,7 +320,7 @@ def main(argv):
     # input list is a mandatory argument
     parser.add_argument("-l", "--inputlist",  required='True',
                         help="list of songs to search in text format")
-    parser.add_argument("-k", "--devkey",  required='True',
+    parser.add_argument("-k", "--devkey",  required='False',
                         help="google developer key to access to main api ")
     parser.add_argument("-vo", "--videooutdir",  
                         help="outputdir for video")    
@@ -340,11 +335,8 @@ def main(argv):
     # check input arguments
     pyAM.ParseArgs(argus)
 
-        
-    # now it is time to try to do something ....
+    # now it is time to try to do something with such amount of code ....
     pyAM.Start()
-
-
 
 if __name__ == "__main__":
     main(sys.argv[1:])
