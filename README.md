@@ -56,7 +56,7 @@ http://youtube.com/watch?v=9bZkp7q19f0
    https://www.python.org/downloads/release/python-364/
    
    ffmpeg:  
-   https://ffmpeg.zeranoe.com/builds/
+   https://ffmpeg.zeranoe.com/builds/  
    (select static for 32 or 64 bit)
    
    google api:  
