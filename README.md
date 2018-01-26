@@ -55,6 +55,10 @@ http://youtube.com/watch?v=9bZkp7q19f0
    python:  
    https://www.python.org/downloads/release/python-364/
    
+   ffmpeg:  
+   https://ffmpeg.zeranoe.com/builds/
+   (select static for 32 or 64 bit)
+   
    google api:  
    pip install --upgrade google-api-python-client
  
@@ -64,11 +68,19 @@ http://youtube.com/watch?v=9bZkp7q19f0
    progress bar:  
    pip install --upgrade tqdm
  
-   httplib2: 
+   httplib2:  
    pip3 install httplib2 --upgrade
 
    google dev key:  
    https://docs.simplecalendar.io/google-api-key/
+   
+   progress bar:  
+   pip install tqdm --upgrade
+   
+   urllib:  
+   pip3 install urllib3 --upgrade
+   
+   
    
    typical command line, don't define a path for the playlist, it will be stored in the audio output directory
    
