@@ -11,11 +11,15 @@ class Test(unittest.TestCase):
 
     def testName(self):
         print("test strip replace string")
-        mystr = "Ultimate Best of Justice / 2006-2011 / HQ Audio quality  \\ tititit"
+        mystr = "Ultimate Best of Justice \"helle\" è```## ici# / 2006-2011 / HQ Audio quality  \\ tititit"
         outstring = mystr.strip("/")
         print(outstring)
         outstring1 =  mystr.replace("/","_")
         outstring1 =  outstring1.replace("\\","_")
+        outstring1 = outstring1.replace('#',' ')
+        outstring1 = outstring1.replace('`',' ')
+        outstring1 = outstring1.replace('"',' ')
+        outstring1 = outstring1.replace('\'',' ')
         print(outstring1)
         print("end")
 

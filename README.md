@@ -40,8 +40,8 @@ http://youtube.com/watch?v=9bZkp7q19f0
 - [x] run test using a list of 116 songs
 - [x] filter extra characters in the input list for robustness
 - [x] second python code extracts mp4 files and convert to mp3
-- [ ] test playlist type search to get id of the playlist and get all the videos links using playlist items
-- [ ] update code to manage playlist and playlist items
+- [x] test playlist type search to get id of the playlist and get all the videos links using playlist items
+- [ ] update code to manage playlist and playlist items [branch + pull request]
 - [ ] test using known playlists of 50, 100 items 
 - [ ] test using bigger playlists
 - [ ] wip
@@ -51,15 +51,48 @@ http://youtube.com/watch?v=9bZkp7q19f0
 
 # Install
 - Windows
+ 
+   python:  
+   https://www.python.org/downloads/release/python-364/
+   
+   ffmpeg:  
+   https://ffmpeg.zeranoe.com/builds/  
+   (select static for 32 or 64 bit)
+   
+   google api:  
+   pip install --upgrade google-api-python-client
+ 
+   six:  
+   pip install --upgrade six
+ 
+   progress bar:  
+   pip install --upgrade tqdm
+ 
+   httplib2:  
+   pip3 install httplib2 --upgrade
 
-  wip
+   google dev key:  
+   https://docs.simplecalendar.io/google-api-key/
+   
+   progress bar:  
+   pip install tqdm --upgrade
+   
+   urllib:  
+   pip3 install urllib3 --upgrade
+   
+   
+   
+   typical command line, don't define a path for the playlist, it will be stored in the audio output directory
+   
+   \<yourpath\>\python.exe \<yourpath\>\pyAudioMain.py --inputlist \<yourpath\>\myinput.txt --devkey \<yourgooglekey\>  --audiooutdir \<yourpath\> --playlist mytestplaylist.m3u8
+
 
 - Linux
 
-  wip
+   wip
 
 - Mac OS
 
-  wip
+   wip
 
 
