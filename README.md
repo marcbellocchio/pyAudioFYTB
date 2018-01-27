@@ -41,7 +41,7 @@ http://youtube.com/watch?v=9bZkp7q19f0
 - [x] filter extra characters in the input list for robustness
 - [x] second python code extracts mp4 files and convert to mp3
 - [x] test playlist type search to get id of the playlist and get all the videos links using playlist items
-- [ ] update code to manage playlist and playlist items [branch + pull request]
+- [X] update code to manage playlist and playlist items [branch + pull request]
 - [ ] test using known playlists of 50, 100 items 
 - [ ] test using bigger playlists
 - [ ] wip
