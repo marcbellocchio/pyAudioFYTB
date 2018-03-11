@@ -66,13 +66,14 @@ class pyAudioPlaylistItems(pyAudioVideos):
                     self.AddToCSV(self.pyAS.GetQuery(), self.pyAV.GetFinalLink(), self.pyAV.GetFullDownloadName())
                 else:
                     # final link not found shall be kept in tracking
-                    self.pyAT.SetError(self, sys._getframe().f_code.co_name, "cannot get final link for download, query is:",self.pyAS.GetQuery() )
+                    errstr = "cannot get final link for download, query is:" + self.pyAS.GetQuery() 
+                    self.pyAT.SetError(type(self).__name__, sys._getframe().f_code.co_name, errstr)
                     # CSV fr logging
                     self.AddToCSV(self.pyAS.GetQuery(), "extended result" + self.pyAS.GetExtendedResult(), "not downloaded")
             else:
                 if(self.pyAS.IsVideoIdMissing() ): # if missing due to a query with empty result, store in trace
                     warn = " >>> videoid is missing from query " + str(self.pyAS.GetQuery()) + str(self.pyAS.GetExtendedResult())
-                    self.pyAT.SetWarning(self, sys._getframe().f_code.co_name, warn)
+                    self.pyAT.SetWarning(type(self).__name__, sys._getframe().f_code.co_name, warn)
                 
             
         
