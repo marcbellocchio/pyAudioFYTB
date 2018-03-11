@@ -5,6 +5,7 @@ Created on 24 nov. 2017
 '''
 from __future__                     import absolute_import
 from pyAudioConfig                  import  pyAudioConfig
+# https://github.com/nficano/pytube
 from pytube                         import YouTube
 import urllib.request
 
@@ -12,8 +13,11 @@ from pyAudioTqdmProgressBar         import pyAudioTqdmUpTo
 
 #import sys
 
+class ExceptionTemplate(Exception):
+    def __call__(self, *args):
+        return self.__class__(*(self.args + args))
 
-class FoundFinalLInk(Exception): pass
+class FoundFinalLInk(ExceptionTemplate): pass
 """
 FoundFinalLInk is an object to use in exception to exit from a nested loop
 """
@@ -206,8 +210,11 @@ class pyAudioVideos(object):
             print(stream)
 
             '''
-        except FoundFinalLInk :
-                pass
+        except FoundFinalLInk as catch_exception :
+            if catch_exception.args[0] != "finalink":
+                error = "exception while trying to collect final link using pytube"
+                print(error)
+                self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, error  )
 
         finally:
             return linkfound
