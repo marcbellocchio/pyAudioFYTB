@@ -34,7 +34,7 @@ class pyAudioInputList(object):
             locale.getdefaultlocale()
             self.file = open(self.filename, 'rU')
         except IOError:
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot open input list" )
+            self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, "cannot open input list" )
             ret = False
         return ret
     
@@ -49,7 +49,7 @@ class pyAudioInputList(object):
         try:
             retline= str(self.file.readline())
         except IOError:
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from"  )
+            self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, "cannot read a line from"  )
         finally:  
             #outline1 = retline.replace("/","")
             #if( (retline !="") and (retline !="\n")) :
@@ -69,7 +69,7 @@ class pyAudioInputList(object):
         try:
             retline= str(self.file.readline())
         except IOError:
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from"  )
+            self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, "cannot read a line from"  )
         finally:  
             #outline1 = retline.replace("/","")
             if( (retline !="") and (retline !="\n")) :
@@ -109,7 +109,7 @@ class pyAudioInputList(object):
                 #if( (retline !="") and (retline !="\n") and (retline !=" ")) :
                     nbline = nbline + 1
         except IOError:
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot read a line from" )
+            self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, "cannot read a line from" )
         finally:
             self.file.seek(0,0)          
             return nbline    
@@ -119,7 +119,7 @@ class pyAudioInputList(object):
         try:
             self.file.close()
         except IOError:
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "cannot close file"  )
+            self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, "cannot close file"  )
         finally:  
             pass    
          

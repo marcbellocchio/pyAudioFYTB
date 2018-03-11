@@ -94,8 +94,8 @@ class pyAudioFFmpeg(object):
     def SetAlbumDesc(self, inalbum):
         # remove first incompatible ffmpeg characters
         self.album = self.StripString(inalbum)
-        if(len(self.album) > 70): #limit the string length to avoid strange artefact in audio player
-            self.album = str(self.album[0:69])
+        if(len(self.album) > 140): #limit the string length to avoid strange artefact in audio player
+            self.album = str(self.album[0:139])
 
     def GetAlbumDesc(self):
         return self.album
@@ -155,7 +155,7 @@ class pyAudioFFmpeg(object):
                 self.tracking.SetInfo(self, sys._getframe().f_code.co_name, infofile )
         except (IOError, OSError, TimeoutExpired):
             handle.kill()
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "exception while executing ffmpeg", strall )
+            self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, "exception while executing ffmpeg", strall )
         finally:
             try:
                 if (os.path.isfile(self.GetInputFile()) ):
@@ -165,7 +165,7 @@ class pyAudioFFmpeg(object):
                     self.tracking.SetInfo(self, sys._getframe().f_code.co_name, errorfile )
             except :  ## if failed, report it back to the user ##
                 errorfile = "exception cannot delete file after ffmpeg" + str(self.GetInputFile())
-                self.tracking.SetError(self, sys._getframe().f_code.co_name, errorfile )
+                self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, errorfile )
 
 
     def CreateCommandExtractAudio(self):
@@ -219,7 +219,7 @@ class pyAudioFFmpeg(object):
                 '''
         except (IOError, OSError, TimeoutExpired):
             handle.kill()
-            self.tracking.SetError(self, sys._getframe().f_code.co_name, "exception while executing ffmpeg", output )
+            self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, "exception while executing ffmpeg", output )
         finally:
             '''
             try:
@@ -251,7 +251,7 @@ class pyAudioFFmpeg(object):
             if handle.wait() != 0:
                 print("warning calling ffmpeg using subprocess fails !, see tracking info", handle.communicate())
                 infofile = "warning calling ffmpeg using subprocess fails ! status" + str(handle.communicate()) + "command :" + str(self.commandextractaudio )
-                self.tracking.SetInfo(self, sys._getframe().f_code.co_name, infofile )
+                self.tracking.SetInfo(type(self).__name__, sys._getframe().f_code.co_name, infofile )
         except (IOError, OSError, TimeoutExpired):
             handle.kill()
             self.tracking.SetError(self, sys._getframe().f_code.co_name, "exception while executing ffmpeg", output )
@@ -261,10 +261,10 @@ class pyAudioFFmpeg(object):
                     os.remove(self.GetInputFile())
                 else:    ## Show an error ##
                     errorfile = "cannot delete file after ffmpeg" + str(self.GetInputFile())
-                    self.tracking.SetInfo(self, sys._getframe().f_code.co_name, errorfile )
+                    self.tracking.SetInfo(type(self).__name__, sys._getframe().f_code.co_name, errorfile )
             except :  ## if failed, report it back to the user ##
                 errorfile = "exception cannot delete file after ffmpeg" + str(self.GetInputFile())
-                self.tracking.SetError(self, sys._getframe().f_code.co_name, errorfile )
+                self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, errorfile )
 
     def DetectOsPlatform(self):
         '''
@@ -286,7 +286,7 @@ class pyAudioFFmpeg(object):
                 self.SetNormalizeOptions(pyAudioConfig.detectvolume_mac)
         except:
                 errorfile = "cannot detect the os platform for input file" + str(self.GetInputFile())
-                self.tracking.SetError(self, sys._getframe().f_code.co_name, errorfile )
+                self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, errorfile )
 
 
 

@@ -223,8 +223,8 @@ class pyAudioSearch(object):
                 else: # detected a line that is not a real query
                     self.SetVideoId(pyAudioConfig.missingidasblankquery, 0) # \n detected so videoID is missing for blank query
                     self.SetPlayListId(pyAudioConfig.missingidasblankquery, 0)
-            except:
-                self.tracking.SetError(self, sys._getframe().f_code.co_name, "error while calling youtube search" )
+            except: 
+                self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, "error while calling youtube search" )
             finally:
                 return returnval # True to say that the end of the input list is not here
         else:
@@ -320,7 +320,7 @@ class pyAudioSearch(object):
                     break                   
             except :
                 error = "cannot get the id of the playlist from jsonobject: " + str(self.GetExtendedResult()) + "query is : " + str(self.GetQuery())
-                self.tracking.SetError(self, sys._getframe().f_code.co_name, error  )
+                self.tracking.SetError(type(self).__name__, sys._getframe().f_code.co_name, error  )
    
 
     def ExtractVideoId(self):

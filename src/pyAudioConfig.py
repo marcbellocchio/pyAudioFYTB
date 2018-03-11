@@ -11,9 +11,9 @@ Created on 6 sept. 2017
 
 class pyAudioConfig():
 
-    # >>>> change me <<<<<<<
+    # >>>> change me <<<<<<< 
     # openssl generic  
-    ffmpegexec_win                      = "C:\\Users\\mbl\\develop\\pyAudioFYTB\\external\\ffmpeg-20171225-613f789-win64-static\\bin\\ffmpeg.exe"
+    ffmpegexec_win                      = "C:\\Users\\mbl\\develop\\pyAudioFYTB-0.1-alpha\\external\\ffmpeg-20171225-613f789-win64-static\\bin\\ffmpeg.exe"
     detectvolume_win                    = "-vn -sn -dn -f null nul"
     ffmpegexec_linux                    = "C:\\OpenSSL-Win32\\bin\\openssl.exe"
     detectvolume_linux                    = "-vn -sn -dn -f null /dev/null"
@@ -21,15 +21,15 @@ class pyAudioConfig():
     detectvolume_mac                    = "-vn -sn -dn -f null /dev/null"
     
     #outputdir                           = "C:\\Users\\mbl\\develop\\pyAudioFYTB\\tmp"
-    outputvideodir                      = "C:\\Users\mbl\\develop\\pyAudioFYTB\\tmpv"
-    outputaudiodir                      = "C:\\Users\mbl\\develop\\pyAudioFYTB\\tmpa"
+    outputvideodir                      = "C:\\Users\mbl\\develop\\pyAudioFYTB-0.1-alpha\\tmpv"
+    outputaudiodir                      = "C:\\Users\mbl\\develop\\pyAudioFYTB-0.1-alpha\\tmpa"
     playlistname                        = "myplaylist.m3u8"
-    logfile                             = "C:\\Users\\mbl\\develop\\pyAudioFYTB\\tmp\\log.txt"
+    logfile                             = "C:\\Users\\mbl\\develop\\pyAudioFYTB-0.1-alpha\\tmp\\log.txt"
     #logfile                             = "C:\\MBL_DATA\\dev\\python\\pyAudioFYTB\\tmp\\log.txt"
     # >>>> end of change me <<<<<<<
     
     #
-    csvlogfile                          = "C:\\Users\mbl\\develop\\pyAudioFYTB\\tmpa\\csvlog.txt"
+    csvlogfile                          = "C:\\Users\mbl\\develop\\pyAudioFYTB-0.1-alpha\\tmpa\\csvlog.txt"
     
     # global settings
     undefined                           = "undefined"
