@@ -14,7 +14,7 @@ from pyAudioConfig          import pyAudioConfig
 from pyAudioCSV             import pyAudioCSV
 from pyAudioFFmpeg          import pyAudioFFmpeg
 import argparse
-
+import json
 
 import sys
 # import getopt
@@ -126,7 +126,7 @@ class pyAudioMain(object):
                 self.SetPlayList(pyAudioConfig.playlistname)
             
         except:
-            self.pyAT.SetError(self, sys._getframe().f_code.co_name, "wrong arguments" + str(argus) )
+            self.pyAT.SetError(type(self).__name__, sys._getframe().f_code.co_name, "wrong arguments" + str(argus) )
     
     def AddToCSV(self, query, link, outputfile ):
         
@@ -261,13 +261,14 @@ class pyAudioMain(object):
             else:
                 # final link not found shall be kept in tracking
                 error = "cannot get final link for download, query is:" + self.pyAS.GetQuery()
-                self.pyAT.SetError(self, sys._getframe().f_code.co_name, error )
+                print(error)
+                self.pyAT.SetError(type(self).__name__, sys._getframe().f_code.co_name, error )
                 # CSV fr logging
                 self.AddToCSV(self.pyAS.GetQuery(), "extended result" + "cannot get final link for download", "not downloaded")
         else:
             if(self.pyAS.IsVideoIdMissing() ): # if missing due to a query with empty result, store in trace
                 warn = " >>> videoid is missing from query " + str(self.pyAS.GetQuery()) + str(self.pyAS.GetExtendedResult())
-                self.pyAT.SetWarning(self, sys._getframe().f_code.co_name, warn)
+                self.pyAT.SetWarning(type(self).__name__, sys._getframe().f_code.co_name, warn)
 
     def DownloadPlaylist(self):
         '''
@@ -305,13 +306,14 @@ class pyAudioMain(object):
                     self.ExtractAudio()
                     # add the short name to the playlist
                     self.AddToPlayList()
-                    # CSV fr logging
+                    # CSV for logging
                     self.AddToCSV(self.title , self.pyAV.GetFinalLink(), self.pyAV.GetFullDownloadName())
                 else:
                     # final link not found shall be kept in tracking
-                    self.pyAT.SetError(self, sys._getframe().f_code.co_name, "cannot get final link for download, title is:",self.title )
-                    # CSV fr logging
-                    self.AddToCSV(self.title, "extended result" + search_result, "not downloaded")
+                    errstr = "cannot get final link for download, title is:" + self.title
+                    self.pyAT.SetError(type(self).__name__, sys._getframe().f_code.co_name, errstr )
+                    # CSV for logging
+                    self.AddToCSV(self.title, "extended result" + json.dumps(search_result), "not downloaded fianl link not found")
         
     
 def main(argv):
